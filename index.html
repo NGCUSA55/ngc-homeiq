@@ -1123,12 +1123,21 @@ html, body {
         </div>
       </div>
 
-      <!-- Mini player -->
+      <!-- Now Playing / Spotify -->
       <div class="sec-head" style="margin-top:4px">
-        <div class="sec-title">Now Playing</div>
-        <div class="sec-action" onclick="goTo('music')">Full player →</div>
+        <div class="sec-title">Music</div>
+        <div class="sec-action" onclick="goTo('music')">Open →</div>
       </div>
-      <div class="mini-player" onclick="goTo('music')">
+      <!-- Not connected state -->
+      <div id="home-spotify-connect" style="background:var(--card);border:1px solid rgba(29,215,84,0.2);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="goTo('music')">
+        <div style="font-size:28px">🎵</div>
+        <div style="flex:1">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:2px">Connect Spotify</div>
+          <div style="font-size:12px;color:var(--text2)">Tap to set up whole-home audio</div>
+        </div>
+        <div style="background:#1db954;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#000">Connect</div>
+      </div>
+      <div class="mini-player" onclick="goTo('music')" style="display:none">
         <div class="mini-album">🎵</div>
         <div class="mini-info">
           <div class="mini-via">Spotify · Sonos</div>
@@ -1216,7 +1225,7 @@ html, body {
       </div>
 
       <!-- Now playing (shown when connected) -->
-      <div class="now-playing-card" id="now-playing-card">
+      <div class="now-playing-card" id="now-playing-card" style="display:none">
         <div class="np-album" id="np-album-art">🎵</div>
         <div class="np-via"><span class="pill pill-green" id="np-via-label">▶ Connect Spotify above</span></div>
         <div class="np-track" id="npTrack">—</div>
@@ -1839,13 +1848,26 @@ async function spotifyAPI(path, method='GET', body=null) {
 }
 
 function initSpotify() {
+  const banner = document.getElementById('spotify-connect-banner');
+  const nowPlaying = document.getElementById('now-playing-card');
+  const miniPlayer = document.querySelector('.mini-player');
+  const homeConnect = document.getElementById('home-spotify-connect');
+
   if (!spotifyToken) {
-    document.getElementById('spotify-connect-banner').style.display = 'block';
+    if (banner) banner.style.display = 'block';
+    if (nowPlaying) nowPlaying.style.display = 'none';
+    if (miniPlayer) miniPlayer.style.display = 'none';
+    if (homeConnect) homeConnect.style.display = 'flex';
     document.getElementById('spotify-status-label').textContent = 'Not Connected';
     document.getElementById('spotify-user-label').textContent = 'Tap below to connect';
     return;
   }
-  document.getElementById('spotify-connect-banner').style.display = 'none';
+
+  // Connected — show player, hide banners
+  if (banner) banner.style.display = 'none';
+  if (nowPlaying) nowPlaying.style.display = 'block';
+  if (miniPlayer) miniPlayer.style.display = 'flex';
+  if (homeConnect) homeConnect.style.display = 'none';
   document.getElementById('spotify-disconnect-btn').style.display = 'block';
 
   // Load Spotify Web Playback SDK
@@ -1863,7 +1885,6 @@ function initSpotify() {
     if (user) {
       document.getElementById('spotify-status-label').textContent = '● Connected';
       document.getElementById('spotify-user-label').textContent = user.display_name || user.email;
-      // Update settings page too
       const sub = document.querySelector('#screen-settings .sr-sub');
       if (sub && sub.textContent.includes('Playing')) sub.textContent = 'Connected · ' + user.display_name;
     }
@@ -2128,6 +2149,8 @@ function startApp() {
 
 // ── Init ──
 checkOnboarding();
+// Always initialize Spotify state on load regardless of onboarding
+initSpotify();
 </script>
 </body>
 </html>
