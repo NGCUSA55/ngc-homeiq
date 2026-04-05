@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NGC HomeIQ — Alexa Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #080a14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding: 20px;
+}
+
+/* Phone */
+.phone {
+  width: 393px;
+  height: 852px;
+  background: #09090f;
+  border-radius: 52px;
+  border: 8px solid #16161e;
+  box-shadow:
+    0 0 0 1px #22222e,
+    0 50px 100px rgba(0,0,0,0.9),
+    inset 0 0 0 1px #131320;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dynamic-island {
+  width: 126px; height: 36px;
+  background: #000;
+  border-radius: 20px;
+  position: absolute;
+  top: 11px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+.di-cam { width: 10px; height: 10px; background: #111; border-radius: 50%; border: 1.5px solid #222; }
+.di-mic { width: 6px; height: 6px; background: #00a8e8; border-radius: 50%; box-shadow: 0 0 6px rgba(0,168,232,0.6); animation: micPulse 2s ease infinite; }
+@keyframes micPulse {
+  0%,100% { opacity: 0.6; box-shadow: 0 0 4px rgba(0,168,232,0.4); }
+  50% { opacity: 1; box-shadow: 0 0 10px rgba(0,168,232,0.8); }
+}
+
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 58px 0 88px;
+  scrollbar-width: none;
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px 0;
+  font-size: 12px;
+  color: #555;
+  font-family: 'JetBrains Mono', monospace;
+}
+.sb-right { display: flex; gap: 5px; align-items: center; }
+
+/* Bottom nav */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 86px;
+  background: rgba(9,9,15,0.96);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid #16161e;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 12px;
+  z-index: 50;
+}
+.nav-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  cursor: pointer; padding: 4px 12px;
+}
+.nav-icon { font-size: 22px; opacity: 0.3; transition: opacity 0.2s; }
+.nav-label { font-size: 9px; color: #333; letter-spacing: 0.5px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; }
+.nav-dot { width: 4px; height: 4px; border-radius: 50%; background: #00a8e8; opacity: 0; margin-top: 1px; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-item.active .nav-label { color: #00a8e8; }
+.nav-item.active .nav-dot { opacity: 1; }
+
+.section { padding: 0 18px; margin-bottom: 22px; }
+
+/* Header */
+.app-header {
+  padding: 6px 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-eyebrow { font-size: 11px; color: #333; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.header-name { font-size: 24px; font-weight: 800; color: #eeeef5; letter-spacing: -0.8px; line-height: 1.1; }
+.header-right { display: flex; gap: 10px; align-items: center; }
+.hdr-btn {
+  width: 38px; height: 38px;
+  background: #13131a;
+  border: 1px solid #1e1e28;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  font-size: 17px;
+  cursor: pointer;
+  position: relative;
+}
+.hdr-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 14px; height: 14px;
+  background: #e74c3c;
+  border-radius: 50%;
+  border: 2px solid #09090f;
+  font-size: 7px; color: white;
+  display: grid; place-items: center;
+  font-weight: 700;
+}
+
+/* Alexa Voice Bar */
+.alexa-bar {
+  background: linear-gradient(135deg, #0a0e1a 0%, #080c18 100%);
+  border: 1px solid #151a2e;
+  border-radius: 22px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.alexa-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, #00a8e8, transparent);
+  opacity: 0.5;
+}
+.alexa-top {
+  display: flex; align-items: center;
+  gap: 12px; margin-bottom: 12px;
+}
+.alexa-ring {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: conic-gradient(#00a8e8 0deg, #0077ff 120deg, #00d4ff 240deg, #00a8e8 360deg);
+  display: grid; place-items: center;
+  position: relative;
+  flex-shrink: 0;
+  animation: alexaSpin 4s linear infinite;
+}
+@keyframes alexaSpin {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(360deg); }
+}
+.alexa-ring::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: #0a0e1a;
+  border-radius: 50%;
+}
+.alexa-ring-inner {
+  position: relative; z-index: 1;
+  font-size: 18px;
+}
+.alexa-label { font-size: 10px; color: #00a8e8; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+.alexa-name { font-size: 15px; font-weight: 700; color: #eeeef5; }
+.alexa-status { font-size: 11px; color: #2a3a5a; margin-top: 2px; }
+
+.alexa-msg {
+  font-size: 13px; color: #6a8aaa;
+  line-height: 1.6; font-weight: 400;
+  min-height: 42px; margin-bottom: 12px;
+}
+
+.alexa-input-row { display: flex; gap: 8px; }
+.alexa-input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #151a2e;
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #eeeef5;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  outline: none;
+}
+.alexa-input::placeholder { color: #2a3a5a; }
+.alexa-input:focus { border-color: rgba(0,168,232,0.35); }
+.alexa-send {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #00a8e8, #0077ff);
+  border: none; border-radius: 12px;
+  display: grid; place-items: center;
+  cursor: pointer; font-size: 16px;
+  color: white; font-weight: bold;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.alexa-send:active { transform: scale(0.92); }
+.alexa-send.loading { opacity: 0.5; pointer-events: none; }
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.chip {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #151a2e;
+  border-radius: 20px;
+  padding: 5px 11px;
+  font-size: 11px; color: #2a4060;
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap; font-weight: 500;
+}
+.chip:active { border-color: #00a8e8; color: #00a8e8; }
+
+/* Section head */
+.sec-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.sec-title { font-size: 17px; font-weight: 800; color: #eeeef5; letter-spacing: -0.3px; }
+.sec-more { font-size: 11px; color: #00a8e8; font-weight: 600; cursor: pointer; }
+
+/* Music card */
+.music-card {
+  background: #0c0e18;
+  border: 1px solid #151a2e;
+  border-radius: 22px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.music-card::after {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(0,168,232,0.07), transparent 70%);
+  pointer-events: none;
+}
+
+.music-services {
+  display: flex; gap: 6px;
+  margin-bottom: 14px;
+}
+.svc-pill {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #1a1e30;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 10px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.svc-pill.spotify { color: #1ed760; border-color: rgba(30,215,96,0.2); }
+.svc-pill.spotify.active { background: rgba(30,215,96,0.08); }
+.svc-pill.amazon { color: #00a8e8; border-color: rgba(0,168,232,0.2); }
+.svc-pill.amazon.active { background: rgba(0,168,232,0.08); }
+.svc-pill.apple { color: #fa2d4a; border-color: rgba(250,45,74,0.2); }
+.svc-pill.apple.active { background: rgba(250,45,74,0.08); }
+
+.music-now {
+  display: flex; gap: 14px;
+  align-items: center; margin-bottom: 14px;
+}
+.album {
+  width: 58px; height: 58px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0d1a2e, #0a2a4a);
+  display: grid; place-items: center;
+  font-size: 26px;
+  flex-shrink: 0;
+  border: 1px solid #151a2e;
+}
+.now-info { flex: 1; min-width: 0; }
+.now-via { font-size: 9px; color: #1ed760; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.now-track { font-size: 15px; font-weight: 800; color: #eeeef5; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-artist { font-size: 12px; color: #2a4060; margin-top: 2px; }
+.heart-btn { font-size: 20px; cursor: pointer; opacity: 0.6; }
+
+.prog-bar { background: #151a2e; border-radius: 3px; height: 3px; margin-bottom: 5px; overflow: hidden; cursor: pointer; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, #1ed760, #00d4a0); border-radius: 3px; width: 42%; }
+.prog-times { display: flex; justify-content: space-between; font-size: 10px; color: #2a3a5a; font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
+
+.ctrl-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.ctrl { font-size: 22px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; }
+.ctrl:active { opacity: 1; }
+.play-circle {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1ed760, #00d4a0);
+  display: grid; place-items: center;
+  cursor: pointer; font-size: 22px;
+  color: #000; transition: transform 0.15s;
+  box-shadow: 0 4px 20px rgba(30,215,96,0.3);
+}
+.play-circle:active { transform: scale(0.93); }
+
+/* Sonos rooms */
+.rooms-label { font-size: 10px; color: #2a3a5a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+.rooms { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.rooms::-webkit-scrollbar { display: none; }
+.room {
+  flex-shrink: 0;
+  background: #0d1020;
+  border: 1px solid #151a2e;
+  border-radius: 14px;
+  padding: 10px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+.room.on { background: rgba(30,215,96,0.06); border-color: rgba(30,215,96,0.25); }
+.room-icon { font-size: 18px; margin-bottom: 5px; }
+.room-name { font-size: 9px; color: #2a4060; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.room-vol { font-size: 12px; font-weight: 800; color: #1ed760; margin-top: 3px; }
+.room-vol.off { color: #1a2030; }
+
+/* Ring Security */
+.ring-card {
+  background: #0c0e18;
+  border: 1px solid #151a2e;
+  border-radius: 22px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.ring-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, #00a8e8, transparent);
+  opacity: 0.3;
+}
+.ring-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.ring-logo {
+  background: linear-gradient(135deg, #0050a0, #00a8e8);
+  border-radius: 10px;
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.ring-title { font-size: 14px; font-weight: 800; color: #eeeef5; }
+.ring-sub { font-size: 11px; color: #2a4060; margin-top: 1px; }
+.ring-live {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(231,76,60,0.1);
+  border: 1px solid rgba(231,76,60,0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 10px; color: #e74c3c;
+  font-weight: 700; letter-spacing: 0.5px;
+}
+.live-dot { width: 5px; height: 5px; background: #e74c3c; border-radius: 50%; animation: liveBlink 1s ease infinite; }
+@keyframes liveBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.ring-cam {
+  background: #080a14;
+  border-radius: 14px;
+  height: 120px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  border: 1px solid #0f1220;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cam-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,50,80,0.3), rgba(0,20,40,0.5));
+}
+.cam-icon { font-size: 36px; opacity: 0.2; position: relative; z-index: 1; }
+.cam-label {
+  position: absolute; bottom: 10px; left: 12px;
+  font-size: 10px; color: rgba(255,255,255,0.4);
+  font-weight: 600; letter-spacing: 0.5px;
+  z-index: 2;
+}
+.cam-time {
+  position: absolute; top: 10px; right: 12px;
+  font-size: 9px; color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 2;
+}
+
+.ring-devices { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ring-dev {
+  background: #0d1020;
+  border: 1px solid #151a2e;
+  border-radius: 14px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ring-dev:active { transform: scale(0.96); }
+.ring-dev.secure { border-color: rgba(0,168,232,0.2); }
+.ring-dev.alert { border-color: rgba(231,76,60,0.2); }
+.rd-icon { font-size: 20px; margin-bottom: 6px; }
+.rd-label { font-size: 9px; color: #2a4060; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; font-weight: 600; }
+.rd-val { font-size: 11px; font-weight: 800; }
+.rd-val.secure { color: #00a8e8; }
+.rd-val.locked { color: #2ecc71; }
+.rd-val.alert { color: #e74c3c; }
+
+/* Scenes */
+.scenes { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.scenes::-webkit-scrollbar { display: none; }
+.scene-card {
+  flex-shrink: 0;
+  background: #0c0e18;
+  border: 1px solid #151a2e;
+  border-radius: 18px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 90px;
+}
+.scene-card:active { transform: scale(0.95); }
+.scene-card.active {
+  background: rgba(0,168,232,0.07);
+  border-color: rgba(0,168,232,0.3);
+}
+.sc-icon { font-size: 26px; margin-bottom: 6px; }
+.sc-name { font-size: 10px; color: #2a4060; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.scene-card.active .sc-name { color: #00a8e8; }
+
+/* Device grid */
+.dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dev-card {
+  background: #0c0e18;
+  border: 1px solid #151a2e;
+  border-radius: 18px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.dev-card:active { transform: scale(0.97); }
+.dev-card.on { border-color: rgba(0,168,232,0.2); }
+.dev-card.on::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(0,168,232,0.05), transparent);
+  pointer-events: none;
+}
+.dev-icon { font-size: 24px; margin-bottom: 10px; }
+.dev-label { font-size: 9px; color: #2a4060; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-weight: 600; }
+.dev-val { font-size: 14px; font-weight: 800; color: #eeeef5; }
+.dev-val.on { color: #00a8e8; }
+.dev-val.off { color: #1a2030; }
+.dev-val.green { color: #2ecc71; }
+.dev-val.amber { color: #f39c12; }
+
+.sw {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 18px;
+  background: #1a2030;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sw.on { background: #00a8e8; }
+.sw::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: white;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.sw.on::after { transform: translateX(14px); }
+
+/* Thermostat */
+.thermo-card {
+  background: #0c0e18;
+  border: 1px solid #151a2e;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.thermo-dial {
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: conic-gradient(#f39c12 0deg 162deg, #1a2030 162deg);
+  display: grid; place-items: center;
+  flex-shrink: 0; position: relative;
+}
+.thermo-dial::before {
+  content: ''; position: absolute; inset: 7px;
+  background: #0c0e18; border-radius: 50%;
+}
+.dial-inner { position: relative; z-index: 1; text-align: center; }
+.dial-num { font-size: 22px; font-weight: 800; color: #f39c12; line-height: 1; }
+.dial-unit { font-size: 9px; color: #2a4060; }
+
+.thermo-detail { flex: 1; }
+.thermo-stats { display: flex; gap: 16px; margin-bottom: 12px; }
+.ts { text-align: center; }
+.ts-val { font-size: 16px; font-weight: 800; }
+.ts-label { font-size: 9px; color: #2a4060; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; font-weight: 600; }
+.thermo-btns { display: flex; gap: 6px; }
+.tb {
+  flex: 1;
+  background: #0d1020;
+  border: 1px solid #151a2e;
+  border-radius: 8px;
+  padding: 6px 4px;
+  font-size: 10px; color: #2a4060;
+  text-align: center; cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+}
+.tb.active { background: rgba(243,156,18,0.1); border-color: rgba(243,156,18,0.3); color: #f39c12; }
+
+/* Mini cards */
+.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mini {
+  background: #0c0e18;
+  border: 1px solid #151a2e;
+  border-radius: 16px;
+  padding: 14px;
+}
+.m-icon { font-size: 18px; margin-bottom: 8px; }
+.m-label { font-size: 9px; color: #2a4060; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-weight: 600; }
+.m-val { font-size: 22px; font-weight: 800; }
+.m-val.g { color: #2ecc71; }
+.m-val.b { color: #00a8e8; }
+.m-sub { font-size: 10px; color: #1a2a3a; margin-top: 1px; }
+.m-bar { background: #151a2e; border-radius: 3px; height: 3px; margin-top: 8px; overflow: hidden; }
+.m-fill { height: 100%; border-radius: 3px; }
+.m-fill.g { background: linear-gradient(90deg, #2ecc71, #00b894); }
+.m-fill.b { background: linear-gradient(90deg, #00a8e8, #0077ff); }
+
+/* Footer */
+.app-footer { text-align: center; padding: 4px 0 10px; }
+.footer-txt { font-size: 10px; color: #1a2030; font-weight: 600; letter-spacing: 0.5px; }
+.footer-txt span { color: #00a8e8; }
+
+/* Dots */
+.dots span {
+  display: inline-block; width: 5px; height: 5px;
+  border-radius: 50%; background: #00a8e8;
+  margin: 0 2px;
+  animation: bdot 1.2s ease infinite;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bdot {
+  0%,80%,100% { transform: scale(0.5); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.section { animation: fadeUp 0.5s ease both; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.3s; }
+.section:nth-child(7) { animation-delay: 0.35s; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="dynamic-island">
+    <div class="di-cam"></div>
+    <div class="di-mic"></div>
+  </div>
+
+  <div class="status-bar">
+    <span id="sTime">9:41</span>
+    <div class="sb-right"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+  </div>
+
+  <div class="screen">
+
+    <!-- Header -->
+    <div class="app-header">
+      <div>
+        <div class="header-eyebrow">NGC HomeIQ™</div>
+        <div class="header-name">Donnie &<br>Kristina's Home</div>
+      </div>
+      <div class="header-right">
+        <div class="hdr-btn">🔔<div class="hdr-badge">2</div></div>
+        <div class="hdr-btn">👤</div>
+      </div>
+    </div>
+
+    <!-- Alexa AI Bar -->
+    <div class="section">
+      <div class="alexa-bar">
+        <div class="alexa-top">
+          <div class="alexa-ring"><div class="alexa-ring-inner">🎙️</div></div>
+          <div>
+            <div class="alexa-label">Alexa · HomeIQ</div>
+            <div class="alexa-name">Ask your home anything</div>
+            <div class="alexa-status">Listening · All systems secure</div>
+          </div>
+        </div>
+        <div class="alexa-msg" id="alexaMsg">
+          Good morning, Donnie. Everything is locked and your garage is closed. Want me to start your morning playlist on Spotify?
+        </div>
+        <div class="alexa-input-row">
+          <input class="alexa-input" id="alexaInput" placeholder="Type or ask Alexa anything…" />
+          <button class="alexa-send" id="alexaBtn" onclick="askAlexa()">→</button>
+        </div>
+        <div class="chips">
+          <div class="chip" onclick="quickAlexa('Play my morning playlist on Spotify in the living room')">🎵 Morning playlist</div>
+          <div class="chip" onclick="quickAlexa('Good night — lock everything')">🌙 Night mode</div>
+          <div class="chip" onclick="quickAlexa('Who rang the doorbell today?')">🔔 Ring activity</div>
+          <div class="chip" onclick="quickAlexa('Set thermostat to 70 degrees')">🌡️ Set temp</div>
+          <div class="chip" onclick="quickAlexa('Is my garage closed?')">🏠 Check garage</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title">Music</div>
+        <div class="sec-more">Browse →</div>
+      </div>
+      <div class="music-card">
+        <!-- Service selector -->
+        <div class="music-services">
+          <div class="svc-pill spotify active" onclick="setSvc(this)">▶ Spotify</div>
+          <div class="svc-pill amazon" onclick="setSvc(this)">♪ Amazon</div>
+          <div class="svc-pill apple" onclick="setSvc(this)"> Apple</div>
+        </div>
+        <!-- Now playing -->
+        <div class="music-now">
+          <div class="album">🎵</div>
+          <div class="now-info">
+            <div class="now-via">Via Spotify · Sonos</div>
+            <div class="now-track" id="trackName">Weightless</div>
+            <div class="now-artist" id="artistName">Marconi Union</div>
+          </div>
+          <div class="heart-btn">🤍</div>
+        </div>
+        <!-- Progress -->
+        <div class="prog-bar"><div class="prog-fill" id="pFill"></div></div>
+        <div class="prog-times"><span id="pTime">1:28</span><span>8:09</span></div>
+        <!-- Controls -->
+        <div class="ctrl-row">
+          <div class="ctrl">⇄</div>
+          <div class="ctrl">⏮</div>
+          <div class="play-circle" id="pBtn" onclick="togglePlay()">⏸</div>
+          <div class="ctrl">⏭</div>
+          <div class="ctrl">⋯</div>
+        </div>
+        <!-- Sonos rooms -->
+        <div class="rooms-label">Sonos Rooms</div>
+        <div class="rooms">
+          <div class="room on" onclick="toggleRoom(this)">
+            <div class="room-icon">🛋️</div>
+            <div class="room-name">Living Rm</div>
+            <div class="room-vol">65%</div>
+          </div>
+          <div class="room" onclick="toggleRoom(this)">
+            <div class="room-icon">🍳</div>
+            <div class="room-name">Kitchen</div>
+            <div class="room-vol off">—</div>
+          </div>
+          <div class="room" onclick="toggleRoom(this)">
+            <div class="room-icon">🛏️</div>
+            <div class="room-name">Bedroom</div>
+            <div class="room-vol off">—</div>
+          </div>
+          <div class="room" onclick="toggleRoom(this)">
+            <div class="room-icon">🚿</div>
+            <div class="room-name">Bath</div>
+            <div class="room-vol off">—</div>
+          </div>
+          <div class="room" onclick="toggleRoom(this)">
+            <div class="room-icon">🏡</div>
+            <div class="room-name">Patio</div>
+            <div class="room-vol off">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ring Security -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title">Ring Security</div>
+        <div class="sec-more">History →</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-header">
+          <div class="ring-logo">📡</div>
+          <div>
+            <div class="ring-title">Front Door Camera</div>
+            <div class="ring-sub">Last motion: 7:14 AM · All clear</div>
+          </div>
+          <div class="ring-live"><div class="live-dot"></div>LIVE</div>
+        </div>
+        <div class="ring-cam">
+          <div class="cam-overlay"></div>
+          <div class="cam-icon">📹</div>
+          <div class="cam-label">FRONT DOOR · HD</div>
+          <div class="cam-time" id="camTime">09:41:22</div>
+        </div>
+        <div class="ring-devices">
+          <div class="ring-dev secure" onclick="toggleRingDev(this, 'lock')">
+            <div class="rd-icon">🔐</div>
+            <div class="rd-label">Front Door</div>
+            <div class="rd-val locked">Locked</div>
+          </div>
+          <div class="ring-dev secure" onclick="toggleRingDev(this, 'lock')">
+            <div class="rd-icon">🔒</div>
+            <div class="rd-label">Back Door</div>
+            <div class="rd-val locked">Locked</div>
+          </div>
+          <div class="ring-dev secure" onclick="toggleRingDev(this, 'garage')">
+            <div class="rd-icon">🏠</div>
+            <div class="rd-label">Garage</div>
+            <div class="rd-val secure">Closed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scenes -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title">Alexa Routines</div>
+        <div class="sec-more">Add routine</div>
+      </div>
+      <div class="scenes">
+        <div class="scene-card active" onclick="setScene(this)">
+          <div class="sc-icon">☀️</div>
+          <div class="sc-name">Morning</div>
+        </div>
+        <div class="scene-card" onclick="setScene(this)">
+          <div class="sc-icon">🎬</div>
+          <div class="sc-name">Movie</div>
+        </div>
+        <div class="scene-card" onclick="setScene(this)">
+          <div class="sc-icon">🍽️</div>
+          <div class="sc-name">Dinner</div>
+        </div>
+        <div class="scene-card" onclick="setScene(this)">
+          <div class="sc-icon">🌙</div>
+          <div class="sc-name">Goodnight</div>
+        </div>
+        <div class="scene-card" onclick="setScene(this)">
+          <div class="sc-icon">🏃</div>
+          <div class="sc-name">Away</div>
+        </div>
+        <div class="scene-card" onclick="setScene(this)">
+          <div class="sc-icon">🎉</div>
+          <div class="sc-name">Party</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Climate -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title">Climate</div>
+        <div class="sec-more">Schedule →</div>
+      </div>
+      <div class="thermo-card">
+        <div class="thermo-dial">
+          <div class="dial-inner">
+            <div class="dial-num">72°</div>
+            <div class="dial-unit">inside</div>
+          </div>
+        </div>
+        <div class="thermo-detail">
+          <div class="thermo-stats">
+            <div class="ts"><div class="ts-val" style="color:#f39c12">72°</div><div class="ts-label">Set to</div></div>
+            <div class="ts"><div class="ts-val" style="color:#00a8e8">58°</div><div class="ts-label">Outside</div></div>
+            <div class="ts"><div class="ts-val" style="color:#2ecc71">42%</div><div class="ts-label">Humidity</div></div>
+          </div>
+          <div class="thermo-btns">
+            <div class="tb active" onclick="setThermo(this)">❄️ Cool</div>
+            <div class="tb" onclick="setThermo(this)">🔥 Heat</div>
+            <div class="tb" onclick="setThermo(this)">💨 Fan</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Devices -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title">Devices</div>
+        <div class="sec-more">All →</div>
+      </div>
+      <div class="dev-grid">
+        <div class="dev-card on" onclick="toggleDev(this)">
+          <div class="sw on"></div>
+          <div class="dev-icon">💡</div>
+          <div class="dev-label">Living Room</div>
+          <div class="dev-val on">On · 80%</div>
+        </div>
+        <div class="dev-card" onclick="toggleDev(this)">
+          <div class="sw"></div>
+          <div class="dev-icon">💡</div>
+          <div class="dev-label">Bedroom</div>
+          <div class="dev-val off">Off</div>
+        </div>
+        <div class="dev-card on">
+          <div class="dev-icon">🔔</div>
+          <div class="dev-label">Ring Doorbell</div>
+          <div class="dev-val green">Live · Armed</div>
+        </div>
+        <div class="dev-card on">
+          <div class="dev-icon">🎙️</div>
+          <div class="dev-label">Echo — Kitchen</div>
+          <div class="dev-val on">Listening</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Health -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title">Home Health</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini">
+          <div class="m-icon">🌬️</div>
+          <div class="m-label">Air Quality</div>
+          <div class="m-val g">96</div>
+          <div class="m-sub">Excellent · AQI 12</div>
+          <div class="m-bar"><div class="m-fill g" style="width:96%"></div></div>
+        </div>
+        <div class="mini">
+          <div class="m-icon">⚡</div>
+          <div class="m-label">Energy Today</div>
+          <div class="m-val b">4.2</div>
+          <div class="m-sub">kWh · ↓18% avg</div>
+          <div class="m-bar"><div class="m-fill b" style="width:42%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="section">
+      <div class="app-footer">
+        <div class="footer-txt">NGC HomeIQ™ · Powered by <span>Alexa</span> · Next Generation Capital</div>
+      </div>
+    </div>
+
+  </div><!-- end screen -->
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="switchNav(this)">
+      <div class="nav-icon">🔒</div>
+      <div class="nav-label">Security</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="switchNav(this)">
+      <div class="nav-icon">🎵</div>
+      <div class="nav-label">Music</div>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="switchNav(this)">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Settings</div>
+      <div class="nav-dot"></div>
+    </div>
+  </div>
+
+</div><!-- end phone -->
+
+<script>
+  // Clock
+  function tick() {
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+    const hh = h % 12 || 12;
+    document.getElementById('sTime').textContent = `${hh}:${m.toString().padStart(2,'0')}`;
+    document.getElementById('camTime').textContent =
+      `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Music progress
+  let playing = true, elapsed = 88, total = 489;
+  setInterval(() => {
+    if (!playing) return;
+    elapsed = (elapsed + 1) % total;
+    const pct = (elapsed / total) * 100;
+    document.getElementById('pFill').style.width = pct + '%';
+    const mm = Math.floor(elapsed / 60), ss = elapsed % 60;
+    document.getElementById('pTime').textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
+  }, 1000);
+
+  function togglePlay() {
+    playing = !playing;
+    document.getElementById('pBtn').textContent = playing ? '⏸' : '▶';
+  }
+
+  // Service selector
+  function setSvc(el) {
+    document.querySelectorAll('.svc-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const tracks = {
+      'spotify': ['Weightless', 'Marconi Union'],
+      'amazon': ['Blinding Lights', 'The Weeknd'],
+      'apple': ['Levitating', 'Dua Lipa']
+    };
+    const cls = ['spotify','amazon','apple'].find(c => el.classList.contains(c));
+    if (cls && tracks[cls]) {
+      document.getElementById('trackName').textContent = tracks[cls][0];
+      document.getElementById('artistName').textContent = tracks[cls][1];
+    }
+  }
+
+  // Sonos rooms
+  function toggleRoom(el) {
+    const isOn = el.classList.toggle('on');
+    const vol = el.querySelector('.room-vol');
+    vol.textContent = isOn ? '65%' : '—';
+    vol.className = 'room-vol' + (isOn ? '' : ' off');
+  }
+
+  // Ring devices
+  function toggleRingDev(el, type) {
+    const val = el.querySelector('.rd-val');
+    if (type === 'lock') {
+      const locked = val.textContent === 'Locked';
+      val.textContent = locked ? 'Unlocked' : 'Locked';
+      val.className = 'rd-val ' + (locked ? 'alert' : 'locked');
+      el.className = 'ring-dev ' + (locked ? 'alert' : 'secure');
+    } else {
+      const closed = val.textContent === 'Closed';
+      val.textContent = closed ? 'Open' : 'Closed';
+      val.className = 'rd-val ' + (closed ? 'alert' : 'secure');
+      el.className = 'ring-dev ' + (closed ? 'alert' : 'secure');
+    }
+  }
+
+  // Scenes
+  function setScene(el) {
+    document.querySelectorAll('.scene-card').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Thermostat
+  function setThermo(el) {
+    document.querySelectorAll('.tb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Device toggles
+  function toggleDev(card) {
+    const sw = card.querySelector('.sw');
+    if (!sw) return;
+    const on = sw.classList.toggle('on');
+    card.classList.toggle('on', on);
+    const val = card.querySelector('.dev-val');
+    const lbl = card.querySelector('.dev-label').textContent;
+    if (lbl.includes('Living')) {
+      val.textContent = on ? 'On · 80%' : 'Off';
+    } else {
+      val.textContent = on ? 'On' : 'Off';
+    }
+    val.className = 'dev-val ' + (on ? 'on' : 'off');
+  }
+
+  // Nav
+  function switchNav(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // AI — Claude API with Alexa persona
+  async function askAlexa(custom) {
+    const input = document.getElementById('alexaInput');
+    const btn = document.getElementById('alexaBtn');
+    const msg = document.getElementById('alexaMsg');
+    const userMsg = custom || input.value.trim();
+    if (!userMsg) return;
+    input.value = '';
+    btn.classList.add('loading');
+    msg.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
+
+    const system = `You are HomeIQ, an Alexa-powered smart home AI assistant for a Next Generation Capital (NGC) new home community. The home has: Ring doorbell (last motion 7:14 AM, all clear), Ring-compatible front and back door locks (both locked), myQ garage door (closed), Nest thermostat at 72°F set to 72°F cool mode, Sonos speakers (living room active on Spotify at 65% playing Weightless by Marconi Union, other rooms off), living room lights on at 80%, bedroom lights off, air quality AQI 12 excellent, energy 4.2 kWh today 18% below average, Echo Dot in kitchen listening. Homeowners: Donnie and Kristina.
+
+Respond in 1-2 sentences only. Be warm, natural, and efficient like Alexa. When music is mentioned, reference Spotify or Sonos specifically. When security is mentioned, reference Ring. Occasionally remind them how their NGC smart home makes life easier.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system,
+          messages: [{ role: 'user', content: userMsg }]
+        })
+      });
+      const data = await res.json();
+      msg.textContent = data.content?.[0]?.text || "I'm having trouble right now — try again!";
+    } catch {
+      msg.textContent = "Having trouble connecting. Check your WiFi!";
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  function quickAlexa(txt) {
+    document.getElementById('alexaInput').value = txt;
+    askAlexa(txt);
+  }
+
+  document.getElementById('alexaInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') askAlexa();
+  });
+</script>
+</body>
+</html>
