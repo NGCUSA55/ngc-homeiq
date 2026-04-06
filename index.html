@@ -1211,10 +1211,13 @@ html, body {
           <div style="font-size:16px">🟢</div>
           <div>
             <div style="font-size:11px;font-weight:700;color:var(--spotify);text-transform:uppercase;letter-spacing:1px" id="spotify-status-label">Not Connected</div>
-            <div style="font-size:10px;color:var(--text3)" id="spotify-user-label">Tap below to connect</div>
+            <div style="font-size:10px;color:var(--text3)" id="spotify-user-label">Tap Connect to get started</div>
           </div>
         </div>
-        <button onclick="spotifyLogout()" id="spotify-disconnect-btn" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text3);font-size:11px;cursor:pointer">Disconnect</button>
+        <div style="display:flex;gap:6px">
+          <button onclick="spotifyLogin()" id="spotify-reconnect-btn" style="display:none;background:#1db954;border:none;border-radius:8px;padding:4px 10px;color:#000;font-size:11px;font-weight:700;cursor:pointer">Reconnect</button>
+          <button onclick="spotifyLogout()" id="spotify-disconnect-btn" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text3);font-size:11px;cursor:pointer">Disconnect</button>
+        </div>
       </div>
 
       <!-- Spotify Connect Banner (shown when not connected) -->
@@ -1222,7 +1225,7 @@ html, body {
         <div style="background:linear-gradient(135deg,#0d2218,#0a1a10);border:1px solid rgba(29,215,84,0.2);border-radius:18px;padding:24px;text-align:center;margin-bottom:16px">
           <div style="font-size:40px;margin-bottom:12px">🎵</div>
           <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:6px">Connect Spotify</div>
-          <div style="font-size:13px;color:var(--text2);margin-bottom:20px;font-weight:300">Log in with your Spotify account to play real music through your NGC home</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:20px;font-weight:300">Log in with your Spotify account to control music throughout your NGC home</div>
           <button onclick="spotifyLogin()" style="background:#1db954;border:none;border-radius:12px;padding:14px 28px;color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;width:100%">▶ Connect with Spotify</button>
         </div>
       </div>
@@ -1725,6 +1728,8 @@ function goTo(screen) {
   const navBtns = document.querySelectorAll('.nav-btn');
   if (navMap[screen] !== undefined) navBtns[navMap[screen]].classList.add('active');
   document.getElementById('screen-' + screen).scrollTop = 0;
+  // Auto-detect what's playing when Music tab opens
+  if (screen === 'music' && spotifyToken) pollNowPlaying();
 }
 
 // ── Clock ──
@@ -1867,6 +1872,7 @@ function initSpotify() {
   if (miniPlayer) miniPlayer.style.display = 'flex';
   if (homeConnect) homeConnect.style.display = 'none';
   document.getElementById('spotify-disconnect-btn').style.display = 'block';
+  document.getElementById('spotify-reconnect-btn').style.display = 'block';
 
   // Get user profile
   spotifyAPI('/me').then(user => {
