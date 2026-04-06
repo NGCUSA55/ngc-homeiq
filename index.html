@@ -1256,42 +1256,37 @@ html, body {
         </div>
       </div>
 
-      <!-- Sonos rooms -->
-      <div class="sec-head">
-        <div class="sec-title">Sonos Rooms</div>
-        <div class="sec-action">Group all</div>
+      <!-- Sonos Speakers -->
+      <div class="sec-head" style="margin-top:8px">
+        <div class="sec-title">Sonos Speakers</div>
+        <div class="sec-action" onclick="addSpeaker()">+ Add</div>
       </div>
-      <div class="rooms-grid">
-        <div class="room-card playing" onclick="toggleRoom(this)">
-          <div class="room-icon">🛋️</div>
-          <div class="room-name">Living Room</div>
-          <div class="room-vol active">65%</div>
+      <div id="speakers-list">
+        <div onclick="addSpeaker()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:16px;cursor:pointer">
+          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">🔊</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Sonos Speaker</div>
+            <div style="font-size:12px;color:var(--text2)">Connect your Sonos system to control rooms</div>
+          </div>
         </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-icon">🍳</div>
-          <div class="room-name">Kitchen</div>
-          <div class="room-vol off">Off</div>
-        </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-icon">🛏️</div>
-          <div class="room-name">Bedroom</div>
-          <div class="room-vol off">Off</div>
-        </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-icon">🚿</div>
-          <div class="room-name">Bathroom</div>
-          <div class="room-vol off">Off</div>
-        </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-icon">🏡</div>
-          <div class="room-name">Patio</div>
-          <div class="room-vol off">Off</div>
-        </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-icon">🏠</div>
-          <div class="room-name">Garage</div>
-          <div class="room-vol off">Off</div>
-        </div>
+      </div>
+
+      <!-- Liked Songs -->
+      <div class="sec-head" style="margin-top:8px">
+        <div class="sec-title">❤️ Liked Songs</div>
+        <div class="sec-action" onclick="loadLikedSongs()">Refresh</div>
+      </div>
+      <div id="liked-songs-list" style="display:flex;flex-direction:column;gap:8px">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your liked songs</div>
+      </div>
+
+      <!-- Your Playlists -->
+      <div class="sec-head" style="margin-top:8px">
+        <div class="sec-title">🎵 Your Playlists</div>
+        <div class="sec-action" onclick="loadPlaylists()">Refresh</div>
+      </div>
+      <div id="playlists-list" style="display:flex;flex-direction:column;gap:8px">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your playlists</div>
       </div>
     </div>
     <div class="spacer"></div>
@@ -1896,6 +1891,9 @@ function initSpotify() {
   // Start polling now playing
   pollNowPlaying();
   spotifyPollInterval = setInterval(pollNowPlaying, 3000);
+
+  // Auto-load browse sections
+  setTimeout(() => { loadPlaylists(); loadLikedSongs(); }, 1000);
 }
 
 function setupPlayer() {
@@ -2021,10 +2019,103 @@ function spotifyLogout() {
   initSpotify();
 }
 
-// ── Fake music functions (kept for non-spotify interactions) ──
-function togglePlay() { spotifyAction('playpause'); }
-function updateProgress() {} // Real progress comes from Spotify poll
-function setSvc(el, svc) {} // Removed - Spotify only for now
+// ── Sonos Speakers ──
+function addSpeaker() {
+  const name = prompt('Speaker name (e.g. Living Room, Kitchen):');
+  if (!name) return;
+  const speakers = JSON.parse(localStorage.getItem('ngc_speakers') || '[]');
+  speakers.push(name);
+  localStorage.setItem('ngc_speakers', JSON.stringify(speakers));
+  renderSpeakers();
+}
+
+function renderSpeakers() {
+  const speakers = JSON.parse(localStorage.getItem('ngc_speakers') || '[]');
+  const list = document.getElementById('speakers-list');
+  if (!list) return;
+  const icons = ['🛋️','🍳','🛏️','🚿','🏡','🏠','📺','🎮'];
+  if (speakers.length === 0) {
+    list.innerHTML = `<div onclick="addSpeaker()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:16px;cursor:pointer">
+      <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">🔊</div>
+      <div><div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Sonos Speaker</div>
+      <div style="font-size:12px;color:var(--text2)">Tap to name and add your first speaker</div></div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = speakers.map((s, i) => `
+    <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px">
+      <div style="font-size:24px">${icons[i % icons.length]}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600">${s}</div>
+      <div style="font-size:11px;color:var(--spotify)">● Ready</div></div>
+      <div onclick="removeSpeaker(${i})" style="color:var(--text3);font-size:18px;cursor:pointer;padding:4px">✕</div>
+    </div>`).join('') +
+    `<div onclick="addSpeaker()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--card);border:1px dashed var(--border2);border-radius:12px;padding:12px;cursor:pointer;color:var(--text2);font-size:13px">
+      + Add another speaker
+    </div>`;
+}
+
+function removeSpeaker(i) {
+  const speakers = JSON.parse(localStorage.getItem('ngc_speakers') || '[]');
+  speakers.splice(i, 1);
+  localStorage.setItem('ngc_speakers', JSON.stringify(speakers));
+  renderSpeakers();
+}
+
+// ── Browse Music ──
+async function loadLikedSongs() {
+  if (!spotifyToken) return;
+  const el = document.getElementById('liked-songs-list');
+  el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Loading...</div>';
+  const data = await spotifyAPI('/me/tracks?limit=20');
+  if (!data || !data.items) { el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Could not load liked songs</div>'; return; }
+  el.innerHTML = data.items.map(item => {
+    const t = item.track;
+    const art = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '';
+    return `<div onclick="playTrack('${t.uri}')" style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;active:opacity:0.7">
+      ${art ? `<img src="${art}" style="width:42px;height:42px;border-radius:6px;flex-shrink:0">` : '<div style="width:42px;height:42px;border-radius:6px;background:var(--border2);flex-shrink:0;display:grid;place-items:center;font-size:18px">🎵</div>'}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
+        <div style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.artists?.map(a=>a.name).join(', ')}</div>
+      </div>
+      <div style="font-size:18px;color:var(--spotify)">▶</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadPlaylists() {
+  if (!spotifyToken) return;
+  const el = document.getElementById('playlists-list');
+  el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Loading...</div>';
+  const data = await spotifyAPI('/me/playlists?limit=20');
+  if (!data || !data.items) { el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Could not load playlists</div>'; return; }
+  el.innerHTML = data.items.map(p => {
+    const art = p.images?.[0]?.url || '';
+    return `<div onclick="playPlaylist('${p.uri}')" style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer">
+      ${art ? `<img src="${art}" style="width:42px;height:42px;border-radius:6px;flex-shrink:0;object-fit:cover">` : '<div style="width:42px;height:42px;border-radius:6px;background:var(--border2);flex-shrink:0;display:grid;place-items:center;font-size:18px">🎵</div>'}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:11px;color:var(--text2)">${p.tracks?.total || 0} songs</div>
+      </div>
+      <div style="font-size:18px;color:var(--spotify)">▶</div>
+    </div>`;
+  }).join('');
+}
+
+async function playTrack(uri) {
+  if (!spotifyToken) return;
+  const device = spotifyDeviceId || localStorage.getItem('spotify_device');
+  const qs = device ? `?device_id=${device}` : '';
+  await spotifyAPI('/me/player/play' + qs, 'PUT', { uris: [uri] });
+  setTimeout(pollNowPlaying, 800);
+}
+
+async function playPlaylist(uri) {
+  if (!spotifyToken) return;
+  const device = spotifyDeviceId || localStorage.getItem('spotify_device');
+  const qs = device ? `?device_id=${device}` : '';
+  await spotifyAPI('/me/player/play' + qs, 'PUT', { context_uri: uri });
+  setTimeout(pollNowPlaying, 800);
+}
 
 // ── Devices ──
 function toggleTile(tile, id) {
@@ -2139,6 +2230,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function startApp() {
   updateClock();
   setInterval(updateClock, 1000);
+  renderSpeakers();
 
   // Check for Spotify OAuth callback
   const urlParams = new URLSearchParams(window.location.search);
