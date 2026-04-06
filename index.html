@@ -1447,105 +1447,120 @@ html, body {
     <div class="climate-hero">
       <div class="page-eyebrow">NGC HomeIQ</div>
       <div class="page-title">Climate</div>
-      <div class="page-sub">Smart thermostat · Auto schedule</div>
+      <div class="page-sub" id="climate-sub">Cooling · Auto schedule on</div>
     </div>
 
     <div class="section">
-      <div class="thermo-big">
-        <div class="thermo-ring-wrap">
-          <svg class="thermo-svg" viewBox="0 0 180 180">
-            <circle cx="90" cy="90" r="75" fill="none" stroke="#1a2235" stroke-width="8"/>
-            <circle cx="90" cy="90" r="75" fill="none" stroke="url(#thermoGrad)"
-              stroke-width="8" stroke-linecap="round"
-              stroke-dasharray="471" stroke-dashoffset="180"
-              transform="rotate(-90 90 90)" id="thermoArc"/>
+
+      <!-- Nest-style thermostat dial -->
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:8px">
+        <div style="position:relative;width:220px;height:220px;margin-bottom:16px">
+          <svg viewBox="0 0 220 220" width="220" height="220">
+            <!-- Track -->
+            <circle cx="110" cy="110" r="96" fill="none" stroke="#1a2235" stroke-width="12" stroke-linecap="round"
+              stroke-dasharray="502" stroke-dashoffset="125" transform="rotate(135 110 110)"/>
+            <!-- Active arc -->
+            <circle cx="110" cy="110" r="96" fill="none" stroke="url(#nestGrad)" stroke-width="12" stroke-linecap="round"
+              stroke-dasharray="502" stroke-dashoffset="300" transform="rotate(135 110 110)" id="nestArc"/>
             <defs>
-              <linearGradient id="thermoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#f59e0b"/>
-                <stop offset="100%" style="stop-color:#ef4444"/>
+              <linearGradient id="nestGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#60a5fa"/>
+                <stop offset="100%" style="stop-color:#3b82f6"/>
               </linearGradient>
             </defs>
           </svg>
-          <div class="thermo-center">
-            <div class="thermo-num" id="thermoDisp">72°</div>
-            <div class="thermo-unit">inside</div>
+          <!-- Center content -->
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px" id="nest-mode-label">COOLING TO</div>
+            <div style="font-family:'Syne',sans-serif;font-size:58px;font-weight:800;line-height:1;color:var(--text)" id="thermoDisp">72°</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px">inside <span style="color:var(--text3)">·</span> <span id="outside-temp">58°</span> outside</div>
           </div>
+          <!-- Minus button -->
+          <button onclick="adjustTemp(-1)" style="position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;display:grid;place-items:center">−</button>
+          <!-- Plus button -->
+          <button onclick="adjustTemp(1)" style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;display:grid;place-items:center">+</button>
         </div>
-        <div class="thermo-stats">
-          <div class="ts">
-            <div class="ts-val" style="color:var(--amber)" id="targetDisp">72°</div>
-            <div class="ts-label">Target</div>
-          </div>
-          <div class="ts">
-            <div class="ts-val" style="color:var(--accent)">58°</div>
-            <div class="ts-label">Outside</div>
-          </div>
-          <div class="ts">
-            <div class="ts-val" style="color:var(--green)">42%</div>
-            <div class="ts-label">Humidity</div>
-          </div>
-        </div>
-        <div class="mode-btns">
-          <div class="mode-btn active" onclick="setMode(this)">❄️ Cool</div>
-          <div class="mode-btn" onclick="setMode(this)">🔥 Heat</div>
-          <div class="mode-btn" onclick="setMode(this)">💨 Fan</div>
-          <div class="mode-btn" onclick="setMode(this)">🌙 Auto</div>
-        </div>
-      </div>
 
-      <!-- Temp adjust -->
-      <div class="temp-adjust">
-        <div class="temp-btn" onclick="adjustTemp(-1)">−</div>
-        <div class="temp-target">
-          <div class="temp-target-val" id="targetVal">72°</div>
-          <div class="temp-target-label">Set Temperature</div>
+        <!-- Stats row -->
+        <div style="display:flex;gap:24px;margin-bottom:16px">
+          <div style="text-align:center">
+            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--accent)" id="targetDisp">72°</div>
+            <div style="font-size:11px;color:var(--text3)">Target</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--green)">42%</div>
+            <div style="font-size:11px;color:var(--text3)">Humidity</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text2)">On</div>
+            <div style="font-size:11px;color:var(--text3)">Fan</div>
+          </div>
         </div>
-        <div class="temp-btn" onclick="adjustTemp(1)">+</div>
+
+        <!-- Mode buttons -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%">
+          <button onclick="setClimateMode('cool',this)" id="mode-cool" style="background:var(--card2);border:1px solid var(--accent);border-radius:12px;padding:10px 4px;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer">❄️<br>Cool</button>
+          <button onclick="setClimateMode('heat',this)" id="mode-heat" style="background:var(--border2);border:1px solid var(--border);border-radius:12px;padding:10px 4px;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer">🔥<br>Heat</button>
+          <button onclick="setClimateMode('auto',this)" id="mode-auto" style="background:var(--border2);border:1px solid var(--border);border-radius:12px;padding:10px 4px;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer">🌡️<br>Auto</button>
+          <button onclick="setClimateMode('off',this)" id="mode-off" style="background:var(--border2);border:1px solid var(--border);border-radius:12px;padding:10px 4px;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer">⭕<br>Off</button>
+        </div>
       </div>
 
       <!-- Schedule -->
-      <div class="sec-head">
+      <div class="sec-head" style="margin-top:8px">
         <div class="sec-title">Today's Schedule</div>
         <div class="sec-action">Edit →</div>
       </div>
-      <div class="schedule-row">
-        <div class="sched-card">
-          <div class="sched-time">6 AM</div>
-          <div class="sched-temp" style="color:var(--amber)">68°</div>
-          <div class="sched-mode">Wake</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">6 AM</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--amber)">68°</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Wake</div>
         </div>
-        <div class="sched-card active">
-          <div class="sched-time">Now</div>
-          <div class="sched-temp" style="color:var(--amber)">72°</div>
-          <div class="sched-mode">Home</div>
+        <div style="background:var(--card2);border:1px solid var(--accent);border-radius:12px;padding:12px 8px;text-align:center">
+          <div style="font-size:11px;color:var(--accent);margin-bottom:4px">Now</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--accent)" id="targetVal">72°</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Home</div>
         </div>
-        <div class="sched-card">
-          <div class="sched-time">6 PM</div>
-          <div class="sched-temp" style="color:var(--green)">70°</div>
-          <div class="sched-mode">Eve</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">6 PM</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--green)">70°</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Evening</div>
         </div>
-        <div class="sched-card">
-          <div class="sched-time">10 PM</div>
-          <div class="sched-temp" style="color:var(--accent)">67°</div>
-          <div class="sched-mode">Sleep</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">10 PM</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--accent)">67°</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Sleep</div>
         </div>
       </div>
 
-      <!-- Air quality -->
-      <div class="sec-head" style="margin-top:4px">
-        <div class="sec-title">Air Quality</div>
+      <!-- Energy + Air Quality -->
+      <div class="sec-head">
+        <div class="sec-title">Air & Energy</div>
       </div>
-      <div class="card card-p" style="display:flex;align-items:center;gap:16px">
-        <div style="font-size:36px">🌬️</div>
-        <div style="flex:1">
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green)">96</div>
-          <div style="font-size:12px;color:var(--text2)">Excellent · AQI 12 · CO₂ normal</div>
-          <div style="background:var(--border);border-radius:3px;height:4px;margin-top:8px;overflow:hidden">
-            <div style="width:96%;height:100%;background:linear-gradient(90deg,var(--green),#16a34a);border-radius:3px"></div>
-          </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">
+          <div style="font-size:22px;margin-bottom:6px">🌬️</div>
+          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--green)">96</div>
+          <div style="font-size:11px;color:var(--text2)">Air Quality</div>
+          <div style="font-size:10px;color:var(--green)">Excellent · AQI 12</div>
         </div>
-        <span class="pill pill-green">Excellent</span>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">
+          <div style="font-size:22px;margin-bottom:6px">⚡</div>
+          <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--amber)">4.2</div>
+          <div style="font-size:11px;color:var(--text2)">kWh Today</div>
+          <div style="font-size:10px;color:var(--green)">18% below avg</div>
+        </div>
       </div>
+
+      <!-- Connect Nest Banner -->
+      <div style="background:linear-gradient(135deg,#0f1a0a,#0a1505);border:1px solid rgba(34,197,94,0.2);border-radius:18px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🌡️</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Nest Thermostat</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Real-time temperature control and energy savings coming soon</div>
+        <div style="background:var(--green);border-radius:10px;padding:10px;color:#000;font-size:12px;font-weight:700">Nest API Integration — Coming Soon</div>
+      </div>
+
     </div>
     <div class="spacer"></div>
   </div>
@@ -1574,55 +1589,34 @@ html, body {
         <div class="setting-row">
           <div class="sr-icon">🎵</div>
           <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>Spotify</div>
-            <div class="sr-sub">Connected · Playing Weightless</div>
+            <div class="sr-label"><span class="svc-dot" id="spotify-dot"></span>Spotify</div>
+            <div class="sr-sub" id="spotify-settings-sub">Not connected</div>
           </div>
-          <div class="sr-val">Active</div>
+          <div class="sr-val" onclick="goTo('music')" style="cursor:pointer;color:var(--accent)">→</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🔊</div>
           <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>Sonos</div>
-            <div class="sr-sub">5 speakers · Living room playing</div>
+            <div class="sr-label">Sonos</div>
+            <div class="sr-sub">Add speakers in the Music tab</div>
           </div>
-          <div class="sr-val">Active</div>
+          <div class="sr-val" onclick="goTo('music')" style="cursor:pointer;color:var(--accent)">→</div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-icon">🔔</div>
+          <div class="sr-text">
+            <div class="sr-label">Ring Security</div>
+            <div class="sr-sub">API integration coming soon</div>
+          </div>
+          <div class="sr-val" style="color:var(--text3)">Soon</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🌡️</div>
           <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>Nest Thermostat</div>
-            <div class="sr-sub">72°F · Cool mode</div>
+            <div class="sr-label">Nest Thermostat</div>
+            <div class="sr-sub">API integration coming soon</div>
           </div>
-          <div class="sr-val">Active</div>
-        </div>
-        <div class="setting-row">
-          <div class="sr-icon">📡</div>
-          <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>Ring</div>
-            <div class="sr-sub">2 cameras · All clear</div>
-          </div>
-          <div class="sr-val">Active</div>
-        </div>
-        <div class="setting-row">
-          <div class="sr-icon">🏠</div>
-          <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>myQ Garage</div>
-            <div class="sr-sub">Closed · Last opened 7:21 AM</div>
-          </div>
-          <div class="sr-val">Active</div>
-        </div>
-      </div>
-
-      <!-- Alexa -->
-      <div class="settings-group">
-        <div class="sg-label">Voice Control</div>
-        <div class="setting-row">
-          <div class="sr-icon">🎙️</div>
-          <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>Amazon Alexa</div>
-            <div class="sr-sub">Echo Dot · Kitchen · Listening</div>
-          </div>
-          <div class="sr-right">›</div>
+          <div class="sr-val" style="color:var(--text3)">Soon</div>
         </div>
       </div>
 
@@ -1956,8 +1950,10 @@ function initSpotify() {
     document.getElementById('spotify-reconnect-btn').style.display = 'none';
     document.getElementById('spotify-status-label').textContent = '● Connected';
     document.getElementById('spotify-user-label').textContent = user.display_name || user.email;
-    const sub = document.querySelector('#screen-settings .sr-sub');
-    if (sub) sub.textContent = 'Connected · ' + (user.display_name || user.email);
+    const dot = document.getElementById('spotify-dot');
+    if (dot) dot.className = 'svc-dot connected';
+    const settingsSub = document.getElementById('spotify-settings-sub');
+    if (settingsSub) settingsSub.textContent = 'Connected · ' + (user.display_name || user.email);
     // Start polling
     pollNowPlaying();
     if (spotifyPollInterval) clearInterval(spotifyPollInterval);
@@ -2242,25 +2238,40 @@ function toggleGarage() {
 // ── Climate ──
 let targetTemp = 72;
 function adjustTemp(delta) {
-  targetTemp = Math.max(60, Math.min(85, targetTemp + delta));
-  ['targetVal','targetDisp'].forEach(id => {
+  const current = parseInt(localStorage.getItem('ngc_temp')) || 72;
+  const temp = Math.max(60, Math.min(85, current + delta));
+  localStorage.setItem('ngc_temp', temp);
+  ['thermoDisp','targetDisp','targetVal'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = targetTemp + '°';
+    if (el) el.textContent = temp + '°';
   });
-  // Update SVG arc
-  const pct = (targetTemp - 60) / 25;
-  const arc = document.getElementById('thermoArc');
-  if (arc) {
-    const circumference = 471;
-    const offset = circumference - (pct * circumference * 0.75);
-    arc.setAttribute('stroke-dashoffset', Math.max(118, offset));
-  }
+  const pct = (temp - 60) / 25;
+  const arc = document.getElementById('nestArc');
+  if (arc) arc.setAttribute('stroke-dashoffset', Math.max(0, 502 - (pct * 377)));
 }
 
-function setMode(btn) {
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function setClimateMode(mode, btn) {
+  const modes = {
+    cool: { label:'COOLING TO', color:'var(--accent)', sub:'Cooling · Auto schedule on' },
+    heat: { label:'HEATING TO', color:'var(--red)', sub:'Heating · Auto schedule on' },
+    auto: { label:'SET TO', color:'var(--green)', sub:'Auto · Eco mode active' },
+    off:  { label:'OFF', color:'var(--text3)', sub:'System off' }
+  };
+  const c = modes[mode] || modes.cool;
+  const label = document.getElementById('nest-mode-label');
+  const sub = document.getElementById('climate-sub');
+  if (label) label.textContent = c.label;
+  if (sub) sub.textContent = c.sub;
+  ['cool','heat','auto','off'].forEach(m => {
+    const b = document.getElementById('mode-' + m);
+    if (b) { b.style.background = 'var(--border2)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text2)'; }
+  });
+  const activeBtn = document.getElementById('mode-' + mode);
+  if (activeBtn) { activeBtn.style.background = 'var(--card2)'; activeBtn.style.borderColor = c.color; activeBtn.style.color = c.color; }
+  localStorage.setItem('ngc_climate_mode', mode);
 }
+
+function setMode(btn) {} // Legacy no-op
 
 // ── AI Assistant ──
 async function askAI(customMsg) {
@@ -2318,6 +2329,12 @@ function startApp() {
   renderSpeakers();
   const savedMode = localStorage.getItem('ngc_arm_mode') || 'disarmed';
   setArmMode(savedMode);
+  const savedClimateMode = localStorage.getItem('ngc_climate_mode') || 'cool';
+  setClimateMode(savedClimateMode);
+  const savedTemp = parseInt(localStorage.getItem('ngc_temp')) || 72;
+  ['thermoDisp','targetDisp','targetVal'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = savedTemp + '°';
+  });
 
   // Check for Spotify OAuth callback
   const urlParams = new URLSearchParams(window.location.search);
