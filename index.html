@@ -1856,40 +1856,48 @@ function initSpotify() {
   const miniPlayer = document.querySelector('.mini-player');
   const homeConnect = document.getElementById('home-spotify-connect');
 
-  if (!spotifyToken) {
+  function showNotConnected() {
     if (banner) banner.style.display = 'block';
     if (nowPlaying) nowPlaying.style.display = 'none';
     if (miniPlayer) miniPlayer.style.display = 'none';
     if (homeConnect) homeConnect.style.display = 'flex';
     document.getElementById('spotify-status-label').textContent = 'Not Connected';
     document.getElementById('spotify-user-label').textContent = 'Tap below to connect';
-    return;
+    document.getElementById('spotify-disconnect-btn').style.display = 'none';
+    document.getElementById('spotify-reconnect-btn').style.display = 'none';
   }
 
-  // Connected — show player, hide banners
-  if (banner) banner.style.display = 'none';
-  if (nowPlaying) nowPlaying.style.display = 'block';
-  if (miniPlayer) miniPlayer.style.display = 'flex';
-  if (homeConnect) homeConnect.style.display = 'none';
-  document.getElementById('spotify-disconnect-btn').style.display = 'block';
-  document.getElementById('spotify-reconnect-btn').style.display = 'block';
+  if (!spotifyToken) { showNotConnected(); return; }
 
-  // Get user profile
-  spotifyAPI('/me').then(user => {
-    if (user) {
-      document.getElementById('spotify-status-label').textContent = '● Connected';
-      document.getElementById('spotify-user-label').textContent = user.display_name || user.email;
-      const sub = document.querySelector('#screen-settings .sr-sub');
-      if (sub && sub.textContent.includes('Playing')) sub.textContent = 'Connected · ' + user.display_name;
+  // Validate token by hitting the API
+  fetch('https://api.spotify.com/v1/me', {
+    headers: { Authorization: 'Bearer ' + spotifyToken }
+  }).then(res => {
+    if (!res.ok) {
+      // Token invalid — clear it and show connect button
+      spotifyLogout();
+      return;
     }
-  });
-
-  // Start polling now playing every 3 seconds
-  pollNowPlaying();
-  spotifyPollInterval = setInterval(pollNowPlaying, 3000);
-
-  // Auto-load browse sections
-  setTimeout(() => { loadPlaylists(); loadLikedSongs(); }, 1000);
+    return res.json();
+  }).then(user => {
+    if (!user) return;
+    // Token valid — show connected state
+    if (banner) banner.style.display = 'none';
+    if (nowPlaying) nowPlaying.style.display = 'block';
+    if (miniPlayer) miniPlayer.style.display = 'flex';
+    if (homeConnect) homeConnect.style.display = 'none';
+    document.getElementById('spotify-disconnect-btn').style.display = 'block';
+    document.getElementById('spotify-reconnect-btn').style.display = 'block';
+    document.getElementById('spotify-status-label').textContent = '● Connected';
+    document.getElementById('spotify-user-label').textContent = user.display_name || user.email;
+    const sub = document.querySelector('#screen-settings .sr-sub');
+    if (sub) sub.textContent = 'Connected · ' + (user.display_name || user.email);
+    // Start polling
+    pollNowPlaying();
+    if (spotifyPollInterval) clearInterval(spotifyPollInterval);
+    spotifyPollInterval = setInterval(pollNowPlaying, 3000);
+    setTimeout(() => { loadPlaylists(); loadLikedSongs(); }, 1000);
+  }).catch(() => showNotConnected());
 }
 
 function setupPlayer() {} // No-op — using Spotify Connect API instead of Web Playback SDK
