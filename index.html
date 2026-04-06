@@ -1165,10 +1165,11 @@ html, body {
           <div class="tile-label">Front Door</div>
           <div class="tile-val green" id="quick-lockval-front">Locked</div>
         </div>
-        <div class="tile" id="tile-garage" onclick="toggleGarage()">
+        <!-- Garage → opens myQ app -->
+        <div class="tile" id="tile-garage" onclick="openMyQ()" style="border-color:rgba(59,130,246,0.2)">
           <div class="tile-icon">🏠</div>
           <div class="tile-label">Garage</div>
-          <div class="tile-val green" id="quick-lockval-garage">Closed</div>
+          <div class="tile-val" style="color:var(--accent)">Open myQ →</div>
         </div>
         <div class="tile" onclick="goTo('climate')">
           <div class="tile-icon">🌡️</div>
@@ -1416,10 +1417,10 @@ html, body {
           <div class="lock-label">Back Door</div>
           <div class="lock-val locked" id="lockval-back">Locked</div>
         </div>
-        <div class="lock-card" id="lock-garage" onclick="toggleGarage()" style="border-color:rgba(34,197,94,0.2)">
+        <div class="lock-card" id="lock-garage" onclick="openMyQ()" style="border-color:rgba(59,130,246,0.2)">
           <div class="lock-icon">🏠</div>
           <div class="lock-label">Garage</div>
-          <div class="lock-val closed" id="lockval-garage">Closed</div>
+          <div class="lock-val" style="color:var(--accent)">Open myQ →</div>
         </div>
         <div class="lock-card" style="border-color:rgba(59,130,246,0.2)">
           <div class="lock-icon">🔔</div>
@@ -2258,15 +2259,15 @@ function toggleLock(id) {
   }
 }
 
-function toggleGarage() {
-  state.garageClosed = !state.garageClosed;
-  const isClosed = state.garageClosed;
-  // Update security screen
-  const val = document.getElementById('lockval-garage');
-  if (val) { val.textContent = isClosed ? 'Closed' : 'Open'; val.className = 'lock-val ' + (isClosed ? 'closed' : 'open'); }
-  // Sync home screen quick control
-  const qt = document.getElementById('quick-lockval-garage');
-  if (qt) { qt.textContent = isClosed ? 'Closed' : 'Open'; qt.style.color = isClosed ? 'var(--green)' : 'var(--amber)'; }
+function openMyQ() {
+  // Try to open myQ app via deep link, fall back to web
+  window.location.href = 'myq://';
+  setTimeout(() => {
+    window.open('https://www.myq.com/app', '_blank');
+  }, 1000);
+}
+
+function toggleGarage() { openMyQ(); } // Legacy — redirect to myQ
 }
 
 // ── Outside Temperature ──
