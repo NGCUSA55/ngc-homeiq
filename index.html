@@ -1868,16 +1868,6 @@ function initSpotify() {
   if (homeConnect) homeConnect.style.display = 'none';
   document.getElementById('spotify-disconnect-btn').style.display = 'block';
 
-  // Load Spotify Web Playback SDK
-  if (!window.Spotify) {
-    const script = document.createElement('script');
-    script.src = 'https://sdk.scdn.co/spotify-player.js';
-    document.head.appendChild(script);
-    window.onSpotifyWebPlaybackSDKReady = setupPlayer;
-  } else {
-    setupPlayer();
-  }
-
   // Get user profile
   spotifyAPI('/me').then(user => {
     if (user) {
@@ -1888,7 +1878,7 @@ function initSpotify() {
     }
   });
 
-  // Start polling now playing
+  // Start polling now playing every 3 seconds
   pollNowPlaying();
   spotifyPollInterval = setInterval(pollNowPlaying, 3000);
 
@@ -1896,33 +1886,9 @@ function initSpotify() {
   setTimeout(() => { loadPlaylists(); loadLikedSongs(); }, 1000);
 }
 
-function setupPlayer() {
-  spotifyPlayer = new window.Spotify.Player({
-    name: 'NGC HomeIQ',
-    getOAuthToken: cb => cb(spotifyToken),
-    volume: 0.65
-  });
-  spotifyPlayer.addListener('ready', ({ device_id }) => {
-    spotifyDeviceId = device_id;
-    localStorage.setItem('spotify_device', device_id);
-  });
-  spotifyPlayer.addListener('player_state_changed', updateFromState);
-  spotifyPlayer.connect();
-}
+function setupPlayer() {} // No-op — using Spotify Connect API instead of Web Playback SDK
 
-function updateFromState(s) {
-  if (!s) return;
-  const track = s.track_window?.current_track;
-  if (!track) return;
-  updateNowPlaying({
-    name: track.name,
-    artist: track.artists?.map(a=>a.name).join(', '),
-    albumArt: track.album?.images?.[0]?.url,
-    isPlaying: !s.paused,
-    progress: s.position,
-    duration: s.duration
-  });
-}
+function updateFromState(s) {} // No-op — using pollNowPlaying instead
 
 async function pollNowPlaying() {
   if (!spotifyToken) return;
@@ -1983,20 +1949,20 @@ function updateNowPlaying({ name, artist, albumArt, isPlaying, progress, duratio
 
 async function spotifyAction(action) {
   if (!spotifyToken) { goTo('music'); return; }
-  const device = spotifyDeviceId || localStorage.getItem('spotify_device');
+  // Get current active device from Spotify
+  const playerState = await spotifyAPI('/me/player');
+  const device = playerState?.device?.id || spotifyDeviceId || localStorage.getItem('spotify_device');
   const qs = device ? `?device_id=${device}` : '';
   switch(action) {
     case 'playpause':
-      const state = await spotifyAPI('/me/player');
-      if (state?.is_playing) await spotifyAPI('/me/player/pause', 'PUT');
+      if (playerState?.is_playing) await spotifyAPI('/me/player/pause', 'PUT');
       else await spotifyAPI('/me/player/play' + qs, 'PUT');
       setTimeout(pollNowPlaying, 500);
       break;
-    case 'next': await spotifyAPI('/me/player/next' + qs, 'POST'); setTimeout(pollNowPlaying,800); break;
-    case 'prev': await spotifyAPI('/me/player/previous' + qs, 'POST'); setTimeout(pollNowPlaying,800); break;
+    case 'next': await spotifyAPI('/me/player/next' + qs, 'POST'); setTimeout(pollNowPlaying, 800); break;
+    case 'prev': await spotifyAPI('/me/player/previous' + qs, 'POST'); setTimeout(pollNowPlaying, 800); break;
     case 'shuffle':
-      const cur = await spotifyAPI('/me/player');
-      await spotifyAPI('/me/player/shuffle?state=' + !cur?.shuffle_state, 'PUT');
+      await spotifyAPI('/me/player/shuffle?state=' + !playerState?.shuffle_state, 'PUT');
       break;
     case 'repeat':
       await spotifyAPI('/me/player/repeat?state=track', 'PUT');
