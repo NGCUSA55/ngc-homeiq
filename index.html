@@ -1045,8 +1045,8 @@ html, body {
   <div class="ob-title">Welcome Home</div>
   <div class="ob-sub">Your NGC smart home is ready. Let's get you set up in under a minute.</div>
   <div class="ob-name-row">
-    <input class="ob-input" id="ob-firstname" placeholder="Your first name" type="text" />
-    <input class="ob-input" id="ob-address" placeholder="Your address (e.g. 4821 Ventris Ct)" type="text" />
+    <input class="ob-input" id="ob-firstname" placeholder="Your first name (e.g. Donnie)" type="text" />
+    <input class="ob-input" id="ob-address" placeholder="House nickname (e.g. The Hanly House)" type="text" />
   </div>
   <div class="ob-steps">
     <div class="ob-step">
@@ -1677,10 +1677,10 @@ const state = {
 // ── Onboarding ──
 function completeOnboarding() {
   const name = document.getElementById('ob-firstname').value.trim();
-  const address = document.getElementById('ob-address').value.trim();
+  const nickname = document.getElementById('ob-address').value.trim();
   if (!name) { document.getElementById('ob-firstname').focus(); return; }
   state.userName = name;
-  state.address = address || '4821 Ventris Court';
+  state.address = nickname || 'My NGC Home';
   localStorage.setItem('ngc_name', name);
   localStorage.setItem('ngc_address', state.address);
   applyUserData();
@@ -1713,7 +1713,7 @@ function checkOnboarding() {
   const savedName = localStorage.getItem('ngc_name');
   if (savedName) {
     state.userName = savedName;
-    state.address = localStorage.getItem('ngc_address') || '4821 Ventris Court';
+    state.address = localStorage.getItem('ngc_address') || 'My NGC Home';
     applyUserData();
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
