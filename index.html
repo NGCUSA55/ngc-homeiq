@@ -1030,14 +1030,16 @@ html, body {
 .vol-ctrl-btn:active { background: var(--border2); transform: scale(0.92); }
 .vol-track {
   flex: 1; background: var(--border);
-  border-radius: 4px; height: 6
+  border-radius: 4px; height: 6px;
+  overflow: hidden;
+}
+</style>
 </head>
 <body>
 
 <div class="ambient"></div>
 
 <!-- ══ ONBOARDING ══ -->
-<div style="position:fixed;top:0;left:0;right:0;height:4px;background:red;z-index:9999"></div>
 <div id="onboarding">
   <div class="ob-logo"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:52px;height:auto;object-fit:contain;filter:brightness(0) invert(1)"></div>
   <div class="ob-title">Welcome Home</div>
@@ -1751,7 +1753,7 @@ function updateClock() {
 
 // ── SPOTIFY REAL INTEGRATION ──
 const SPOTIFY_CLIENT_ID = '964b2626dbdd489faeb0c02cbb7fde75';
-const SPOTIFY_REDIRECT = 'https://ngc-homeiq.vercel.app';
+const SPOTIFY_REDIRECT = 'https://ngc-homeiq-blxsmzg8d-ngcusa55s-projects.vercel.app';
 const SPOTIFY_SCOPES = [
   'streaming','user-read-email','user-read-private',
   'user-read-playback-state','user-modify-playback-state',
