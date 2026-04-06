@@ -1888,7 +1888,7 @@ function initSpotify() {
     if (miniPlayer) miniPlayer.style.display = 'flex';
     if (homeConnect) homeConnect.style.display = 'none';
     document.getElementById('spotify-disconnect-btn').style.display = 'block';
-    document.getElementById('spotify-reconnect-btn').style.display = 'block';
+    document.getElementById('spotify-reconnect-btn').style.display = 'none';
     document.getElementById('spotify-status-label').textContent = '● Connected';
     document.getElementById('spotify-user-label').textContent = user.display_name || user.email;
     const sub = document.querySelector('#screen-settings .sr-sub');
