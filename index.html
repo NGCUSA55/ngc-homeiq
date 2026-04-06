@@ -1092,13 +1092,13 @@ html, body {
           <div class="sp-val" style="color:var(--amber)" id="stat-temp">72°</div>
           <div class="sp-label">Inside</div>
         </div>
+        <div class="stat-pill" onclick="goTo('climate')">
+          <div class="sp-val" style="color:var(--accent)" id="stat-outside">--°</div>
+          <div class="sp-label">Outside</div>
+        </div>
         <div class="stat-pill" onclick="goTo('music')">
           <div class="sp-val" style="color:var(--spotify)">♫</div>
-          <div class="sp-label">Playing</div>
-        </div>
-        <div class="stat-pill">
-          <div class="sp-val" style="color:var(--green)">96</div>
-          <div class="sp-label">Air</div>
+          <div class="sp-label">Music</div>
         </div>
       </div>
     </div>
@@ -1157,30 +1157,28 @@ html, body {
       <!-- Quick devices -->
       <div class="sec-head" style="margin-top:16px">
         <div class="sec-title">Quick Controls</div>
-        <div class="sec-action" onclick="goTo('security')">All devices →</div>
+        <div class="sec-action" onclick="goTo('security')">All →</div>
       </div>
       <div class="tile-grid">
-        <div class="tile on" id="tile-lr" onclick="toggleTile(this,'lr')">
-          <div class="tile-toggle"><button class="toggle on" id="tog-lr"></button></div>
-          <div class="tile-icon">💡</div>
-          <div class="tile-label">Living Room</div>
-          <div class="tile-val green" id="val-lr">On · 80%</div>
-        </div>
-        <div class="tile" id="tile-bd" onclick="toggleTile(this,'bd')">
-          <div class="tile-toggle"><button class="toggle" id="tog-bd"></button></div>
-          <div class="tile-icon">💡</div>
-          <div class="tile-label">Bedroom</div>
-          <div class="tile-val dim" id="val-bd">Off</div>
-        </div>
-        <div class="tile blue-on" onclick="goTo('security')">
+        <div class="tile" id="tile-front" onclick="toggleLock('front')">
           <div class="tile-icon">🔐</div>
           <div class="tile-label">Front Door</div>
-          <div class="tile-val green">Locked</div>
+          <div class="tile-val green" id="quick-lockval-front">Locked</div>
         </div>
-        <div class="tile blue-on" onclick="goTo('security')">
+        <div class="tile" id="tile-garage" onclick="toggleGarage()">
           <div class="tile-icon">🏠</div>
           <div class="tile-label">Garage</div>
-          <div class="tile-val green">Closed</div>
+          <div class="tile-val green" id="quick-lockval-garage">Closed</div>
+        </div>
+        <div class="tile" onclick="goTo('climate')">
+          <div class="tile-icon">🌡️</div>
+          <div class="tile-label">Climate</div>
+          <div class="tile-val green" id="quick-temp">72°</div>
+        </div>
+        <div class="tile" onclick="goTo('music')">
+          <div class="tile-icon">🎵</div>
+          <div class="tile-label">Music</div>
+          <div class="tile-val" id="quick-music" style="color:var(--text3)">Tap to play</div>
         </div>
       </div>
     </div>
@@ -1963,6 +1961,9 @@ function initSpotify() {
     if (dot) dot.className = 'svc-dot connected';
     const settingsSub = document.getElementById('spotify-settings-sub');
     if (settingsSub) settingsSub.textContent = 'Connected · ' + (user.display_name || user.email);
+    // Update quick control
+    const qm = document.getElementById('quick-music');
+    if (qm) { qm.textContent = 'Connected'; qm.style.color = 'var(--spotify)'; }
     // Start polling
     pollNowPlaying();
     if (spotifyPollInterval) clearInterval(spotifyPollInterval);
@@ -2142,6 +2143,19 @@ function removeSpeaker(i) {
   renderSpeakers();
 }
 
+// ── Weather ──
+async function fetchWeather() {
+  try {
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.5816&longitude=-121.4944&current=temperature_2m&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles');
+    const data = await res.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const outsidePill = document.getElementById('stat-outside');
+    if (outsidePill) outsidePill.textContent = temp + '°';
+    const outsideClimate = document.getElementById('outside-temp');
+    if (outsideClimate) outsideClimate.textContent = temp + '°';
+  } catch(e) {}
+}
+
 // ── Browse Music ──
 async function loadLikedSongs(showAll = false) {
   if (!spotifyToken) return;
@@ -2225,26 +2239,50 @@ function toggleTile(tile, id) {
 
 // ── Locks ──
 function toggleLock(id) {
-  const isLocked = state[id === 'front' ? 'frontLocked' : 'backLocked'];
-  state[id === 'front' ? 'frontLocked' : 'backLocked'] = !isLocked;
+  const key = id === 'front' ? 'frontLocked' : 'backLocked';
+  state[key] = !state[key];
+  const isNowLocked = state[key];
+  // Update security screen
   const card = document.getElementById('lock-' + id);
   const val = document.getElementById('lockval-' + id);
-  if (!card || !val) return;
-  card.className = 'lock-card ' + (isLocked ? 'unlocked' : 'locked');
-  val.textContent = isLocked ? 'Unlocked' : 'Locked';
-  val.className = 'lock-val ' + (isLocked ? 'unlocked' : 'locked');
+  if (card) card.className = 'lock-card ' + (isNowLocked ? 'locked' : 'unlocked');
+  if (val) { val.textContent = isNowLocked ? 'Locked' : 'Unlocked'; val.className = 'lock-val ' + (isNowLocked ? 'locked' : 'unlocked'); }
+  // Sync home screen quick control
+  if (id === 'front') {
+    const qt = document.getElementById('quick-lockval-front');
+    const tile = document.getElementById('tile-front');
+    if (qt) { qt.textContent = isNowLocked ? 'Locked' : 'Unlocked'; qt.style.color = isNowLocked ? 'var(--green)' : 'var(--amber)'; }
+  }
 }
 
 function toggleGarage() {
   state.garageClosed = !state.garageClosed;
+  const isClosed = state.garageClosed;
+  // Update security screen
   const val = document.getElementById('lockval-garage');
-  if (val) {
-    val.textContent = state.garageClosed ? 'Closed' : 'Open';
-    val.className = 'lock-val ' + (state.garageClosed ? 'closed' : 'open');
-  }
+  if (val) { val.textContent = isClosed ? 'Closed' : 'Open'; val.className = 'lock-val ' + (isClosed ? 'closed' : 'open'); }
+  // Sync home screen quick control
+  const qt = document.getElementById('quick-lockval-garage');
+  if (qt) { qt.textContent = isClosed ? 'Closed' : 'Open'; qt.style.color = isClosed ? 'var(--green)' : 'var(--amber)'; }
 }
 
-// ── Climate ──
+// ── Outside Temperature ──
+async function fetchOutsideTemp() {
+  try {
+    // Sacramento coordinates — when Nest connects this will use home's location
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.5816&longitude=-121.4944&current=temperature_2m&temperature_unit=fahrenheit&timezone=America/Los_Angeles');
+    const data = await res.json();
+    const temp = Math.round(data.current?.temperature_2m);
+    if (temp) {
+      // Update hero pill
+      const statOutside = document.getElementById('stat-outside');
+      if (statOutside) statOutside.textContent = temp + '°';
+      // Update climate dial
+      const outsideEl = document.getElementById('outside-temp');
+      if (outsideEl) outsideEl.textContent = temp + '°';
+    }
+  } catch(e) { /* silent fail */ }
+}
 let currentZone = 'down';
 const zoneDefaults = {
   down: { temp: 72, mode: 'cool', humidity: '42%' },
@@ -2389,6 +2427,19 @@ function startApp() {
   setArmMode(savedMode);
   const savedClimateMode = localStorage.getItem('ngc_climate_mode_down') || 'cool';
   switchZone('down');
+  // Fetch real outside temperature
+  fetchWeather();
+  setInterval(fetchWeather, 30 * 60 * 1000); // Refresh every 30 min
+
+  // Fetch outside temperature
+  fetchOutsideTemp();
+  setInterval(fetchOutsideTemp, 10 * 60 * 1000); // refresh every 10 min
+
+  // Sync quick controls with current state
+  const qt = document.getElementById('quick-temp');
+  if (qt) qt.textContent = (parseInt(localStorage.getItem('ngc_temp_down')) || 72) + '°';
+  const qm = document.getElementById('quick-music');
+  if (qm && spotifyToken) { qm.textContent = 'Connected'; qm.style.color = 'var(--spotify)'; }
 
   // Check for Spotify OAuth callback
   const urlParams = new URLSearchParams(window.location.search);
