@@ -1300,56 +1300,112 @@ html, body {
     <div class="security-status">
       <div class="page-eyebrow">NGC HomeIQ</div>
       <div class="page-title">Security</div>
-      <div class="page-sub">All systems armed · Last checked just now</div>
+      <div class="page-sub" id="sec-sub">Ring · Professional monitoring</div>
     </div>
 
     <div class="section">
-      <div class="sec-status-card">
-        <div class="sec-icon-big">🛡️</div>
-        <div class="sec-status-text">
-          <div class="sec-status-val" style="color:var(--green)">All Secure</div>
-          <div class="sec-status-sub">2 cameras active · 2 locks secured · Garage closed</div>
+
+      <!-- Arm/Disarm Panel -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800" id="arm-status-label">Disarmed</div>
+            <div style="font-size:11px;color:var(--text2)" id="arm-status-sub">Tap to arm your home</div>
+          </div>
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--border2);display:grid;place-items:center;font-size:22px" id="arm-icon">🔓</div>
         </div>
-        <span class="pill pill-green">Armed</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <button onclick="setArmMode('disarmed')" id="arm-btn-disarmed" style="background:#1a2235;border:1px solid var(--green);border-radius:12px;padding:10px 6px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer">
+            🔓<br>Disarmed
+          </button>
+          <button onclick="setArmMode('home')" id="arm-btn-home" style="background:var(--border2);border:1px solid var(--border);border-radius:12px;padding:10px 6px;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer">
+            🏠<br>Home
+          </button>
+          <button onclick="setArmMode('away')" id="arm-btn-away" style="background:var(--border2);border:1px solid var(--border);border-radius:12px;padding:10px 6px;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer">
+            🚗<br>Away
+          </button>
+        </div>
+      </div>
+
+      <!-- Motion Alerts -->
+      <div class="sec-head">
+        <div class="sec-title">Recent Activity</div>
+        <div class="sec-action">View all →</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px">
+          <div style="font-size:22px">🔔</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Motion detected · Front Door</div>
+            <div style="font-size:11px;color:var(--text2)">Today 7:14 AM · Cleared</div>
+          </div>
+          <span class="pill pill-green" style="font-size:10px">Clear</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px">
+          <div style="font-size:22px">📦</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Package detected · Front Door</div>
+            <div style="font-size:11px;color:var(--text2)">Today 6:42 AM · Delivered</div>
+          </div>
+          <span class="pill pill-blue" style="font-size:10px">Info</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px">
+          <div style="font-size:22px">🚗</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Garage opened · Driveway</div>
+            <div style="font-size:11px;color:var(--text2)">Yesterday 6:05 PM · Closed 6:08 PM</div>
+          </div>
+          <span class="pill pill-green" style="font-size:10px">Clear</span>
+        </div>
       </div>
 
       <!-- Cameras -->
       <div class="sec-head">
         <div class="sec-title">Cameras</div>
-        <div class="sec-action">History →</div>
+        <div class="sec-action" onclick="addCamera()">+ Add</div>
       </div>
-      <div class="cam-card">
-        <div class="cam-view">
-          <div class="cam-overlay-text">HD LIVE FEED</div>
-          <div class="cam-live"><div class="live-dot"></div>LIVE</div>
-          <div class="cam-time-stamp" id="camStamp">00:00:00</div>
-        </div>
-        <div class="cam-footer">
-          <div>
-            <div class="cam-name">Front Door</div>
-            <div class="cam-sub">Last motion: 7:14 AM · All clear</div>
+      <div id="cameras-list">
+        <div class="cam-card">
+          <div class="cam-view">
+            <div class="cam-overlay-text">HD LIVE FEED</div>
+            <div class="cam-live"><div class="live-dot"></div>LIVE</div>
+            <div class="cam-time-stamp" id="camStamp">00:00:00</div>
           </div>
-          <span class="pill pill-blue">HD</span>
-        </div>
-      </div>
-      <div class="cam-card">
-        <div class="cam-view" style="background: linear-gradient(160deg,#0a180e,#060e08,#08140a)">
-          <div class="cam-overlay-text">HD LIVE FEED</div>
-          <div class="cam-live"><div class="live-dot"></div>LIVE</div>
-          <div class="cam-time-stamp" id="camStamp2">00:00:00</div>
-        </div>
-        <div class="cam-footer">
-          <div>
-            <div class="cam-name">Backyard</div>
-            <div class="cam-sub">No motion detected today</div>
+          <div class="cam-footer">
+            <div>
+              <div class="cam-name">Front Door · Ring Video Doorbell</div>
+              <div class="cam-sub">Motion: 7:14 AM · Battery 82%</div>
+            </div>
+            <span class="pill pill-blue">HD</span>
           </div>
-          <span class="pill pill-blue">HD</span>
+        </div>
+        <div class="cam-card">
+          <div class="cam-view" style="background:linear-gradient(160deg,#0a180e,#060e08,#08140a)">
+            <div class="cam-overlay-text">HD LIVE FEED</div>
+            <div class="cam-live"><div class="live-dot"></div>LIVE</div>
+            <div class="cam-time-stamp" id="camStamp2">00:00:00</div>
+          </div>
+          <div class="cam-footer">
+            <div>
+              <div class="cam-name">Backyard · Ring Stick Up Cam</div>
+              <div class="cam-sub">No motion today · Wired</div>
+            </div>
+            <span class="pill pill-blue">HD</span>
+          </div>
+        </div>
+        <div onclick="addCamera()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:16px;cursor:pointer;margin-top:8px">
+          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">📷</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Camera</div>
+            <div style="font-size:12px;color:var(--text2)">Ring, Nest, or any camera</div>
+          </div>
         </div>
       </div>
 
       <!-- Locks -->
-      <div class="sec-head" style="margin-top:4px">
+      <div class="sec-head" style="margin-top:8px">
         <div class="sec-title">Locks & Access</div>
+        <div class="sec-action">History →</div>
       </div>
       <div class="lock-grid">
         <div class="lock-card locked" id="lock-front" onclick="toggleLock('front')">
@@ -1373,6 +1429,15 @@ html, body {
           <div class="lock-val" style="color:var(--accent)">Armed</div>
         </div>
       </div>
+
+      <!-- Connect Ring Banner -->
+      <div style="background:linear-gradient(135deg,#0a0f1a,#0d1520);border:1px solid rgba(59,130,246,0.2);border-radius:18px;padding:20px;text-align:center;margin-top:8px">
+        <div style="font-size:32px;margin-bottom:8px">🔔</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Ring</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Real-time alerts, live camera feeds and remote access coming soon</div>
+        <div style="background:var(--accent);border-radius:10px;padding:10px;color:#fff;font-size:12px;font-weight:700">Ring API Integration — Coming Soon</div>
+      </div>
+
     </div>
     <div class="spacer"></div>
   </div>
@@ -2000,7 +2065,37 @@ function spotifyLogout() {
   initSpotify();
 }
 
-// ── Sonos Speakers ──
+// ── Security ──
+function setArmMode(mode) {
+  const configs = {
+    disarmed: { label:'Disarmed', sub:'Tap to arm your home', icon:'🔓', color:'var(--green)', btn:'arm-btn-disarmed' },
+    home:     { label:'Armed — Home', sub:'Motion alerts on · Interior off', icon:'🏠', color:'var(--amber)', btn:'arm-btn-home' },
+    away:     { label:'Armed — Away', sub:'All sensors active · Monitoring on', icon:'🚗', color:'var(--red)', btn:'arm-btn-away' },
+  };
+  const c = configs[mode];
+  if (!c) return;
+  document.getElementById('arm-status-label').textContent = c.label;
+  document.getElementById('arm-status-label').style.color = c.color;
+  document.getElementById('arm-status-sub').textContent = c.sub;
+  document.getElementById('arm-icon').textContent = c.icon;
+  // Reset all buttons
+  ['disarmed','home','away'].forEach(m => {
+    const btn = document.getElementById('arm-btn-' + m);
+    btn.style.background = 'var(--border2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--text2)';
+  });
+  // Highlight active
+  const active = document.getElementById(c.btn);
+  active.style.background = 'var(--card2)';
+  active.style.borderColor = c.color;
+  active.style.color = c.color;
+  localStorage.setItem('ngc_arm_mode', mode);
+}
+
+function addCamera() {
+  alert('Camera setup: When Ring API access is approved, this will walk you through connecting your Ring cameras. For now the demo shows what the live view will look like.');
+}
 function addSpeaker() {
   const name = prompt('Speaker name (e.g. Living Room, Kitchen):');
   if (!name) return;
@@ -2221,6 +2316,8 @@ function startApp() {
   updateClock();
   setInterval(updateClock, 1000);
   renderSpeakers();
+  const savedMode = localStorage.getItem('ngc_arm_mode') || 'disarmed';
+  setArmMode(savedMode);
 
   // Check for Spotify OAuth callback
   const urlParams = new URLSearchParams(window.location.search);
