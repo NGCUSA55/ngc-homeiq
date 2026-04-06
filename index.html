@@ -1274,15 +1274,6 @@ html, body {
         </div>
       </div>
 
-      <!-- Liked Songs -->
-      <div class="sec-head" style="margin-top:8px">
-        <div class="sec-title">❤️ Liked Songs</div>
-        <div class="sec-action" onclick="loadLikedSongs()">Refresh</div>
-      </div>
-      <div id="liked-songs-list" style="display:flex;flex-direction:column;gap:8px">
-        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your liked songs</div>
-      </div>
-
       <!-- Your Playlists -->
       <div class="sec-head" style="margin-top:8px">
         <div class="sec-title">🎵 Your Playlists</div>
@@ -1290,6 +1281,15 @@ html, body {
       </div>
       <div id="playlists-list" style="display:flex;flex-direction:column;gap:8px">
         <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your playlists</div>
+      </div>
+
+      <!-- Liked Songs -->
+      <div class="sec-head" style="margin-top:8px">
+        <div class="sec-title">❤️ Liked Songs</div>
+        <div class="sec-action" onclick="loadLikedSongs()">Refresh</div>
+      </div>
+      <div id="liked-songs-list" style="display:flex;flex-direction:column;gap:8px">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your liked songs</div>
       </div>
     </div>
     <div class="spacer"></div>
@@ -2043,16 +2043,18 @@ function removeSpeaker(i) {
 }
 
 // ── Browse Music ──
-async function loadLikedSongs() {
+async function loadLikedSongs(showAll = false) {
   if (!spotifyToken) return;
   const el = document.getElementById('liked-songs-list');
-  el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Loading...</div>';
-  const data = await spotifyAPI('/me/tracks?limit=20');
+  if (!showAll) el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Loading...</div>';
+  const limit = showAll ? 50 : 5;
+  const data = await spotifyAPI(`/me/tracks?limit=${showAll ? 50 : 20}`);
   if (!data || !data.items) { el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Could not load liked songs</div>'; return; }
-  el.innerHTML = data.items.map(item => {
+  const items = showAll ? data.items : data.items.slice(0, 5);
+  const rows = items.map(item => {
     const t = item.track;
     const art = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '';
-    return `<div onclick="playTrack('${t.uri}')" style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;active:opacity:0.7">
+    return `<div onclick="playTrack('${t.uri}')" style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer">
       ${art ? `<img src="${art}" style="width:42px;height:42px;border-radius:6px;flex-shrink:0">` : '<div style="width:42px;height:42px;border-radius:6px;background:var(--border2);flex-shrink:0;display:grid;place-items:center;font-size:18px">🎵</div>'}
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
@@ -2061,15 +2063,19 @@ async function loadLikedSongs() {
       <div style="font-size:18px;color:var(--spotify)">▶</div>
     </div>`;
   }).join('');
+  const moreBtn = !showAll && data.items.length > 5 ? 
+    `<div onclick="loadLikedSongs(true)" style="text-align:center;padding:12px;color:var(--spotify);font-size:13px;font-weight:600;cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:12px">Show more liked songs →</div>` : '';
+  el.innerHTML = rows + moreBtn;
 }
 
-async function loadPlaylists() {
+async function loadPlaylists(showAll = false) {
   if (!spotifyToken) return;
   const el = document.getElementById('playlists-list');
-  el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Loading...</div>';
-  const data = await spotifyAPI('/me/playlists?limit=20');
+  if (!showAll) el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Loading...</div>';
+  const data = await spotifyAPI('/me/playlists?limit=50');
   if (!data || !data.items) { el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Could not load playlists</div>'; return; }
-  el.innerHTML = data.items.map(p => {
+  const items = showAll ? data.items : data.items.slice(0, 5);
+  const rows = items.map(p => {
     const art = p.images?.[0]?.url || '';
     return `<div onclick="playPlaylist('${p.uri}')" style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer">
       ${art ? `<img src="${art}" style="width:42px;height:42px;border-radius:6px;flex-shrink:0;object-fit:cover">` : '<div style="width:42px;height:42px;border-radius:6px;background:var(--border2);flex-shrink:0;display:grid;place-items:center;font-size:18px">🎵</div>'}
@@ -2080,6 +2086,9 @@ async function loadPlaylists() {
       <div style="font-size:18px;color:var(--spotify)">▶</div>
     </div>`;
   }).join('');
+  const moreBtn = !showAll && data.items.length > 5 ?
+    `<div onclick="loadPlaylists(true)" style="text-align:center;padding:12px;color:var(--spotify);font-size:13px;font-weight:600;cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:12px">Show more playlists →</div>` : '';
+  el.innerHTML = rows + moreBtn;
 }
 
 async function playTrack(uri) {
