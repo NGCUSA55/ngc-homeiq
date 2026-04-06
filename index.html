@@ -1757,7 +1757,8 @@ const SPOTIFY_REDIRECT = 'https://ngc-homeiq.vercel.app';
 const SPOTIFY_SCOPES = [
   'streaming','user-read-email','user-read-private',
   'user-read-playback-state','user-modify-playback-state',
-  'user-read-currently-playing','playlist-read-private'
+  'user-read-currently-playing','playlist-read-private',
+  'user-library-read'
 ].join(' ');
 
 let spotifyToken = localStorage.getItem('spotify_token') || null;
