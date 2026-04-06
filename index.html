@@ -1452,14 +1452,26 @@ html, body {
 
     <div class="section">
 
+      <!-- Zone selector -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <button onclick="switchZone('down')" id="zone-btn-down" style="background:var(--card2);border:1px solid var(--accent);border-radius:14px;padding:12px;cursor:pointer;text-align:left">
+          <div style="font-size:18px;margin-bottom:4px">🏠</div>
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent)">Downstairs</div>
+          <div style="font-size:11px;color:var(--text2)" id="zone-down-status">72° · Cooling</div>
+        </button>
+        <button onclick="switchZone('up')" id="zone-btn-up" style="background:var(--border2);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;text-align:left">
+          <div style="font-size:18px;margin-bottom:4px">🛏️</div>
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text2)">Upstairs</div>
+          <div style="font-size:11px;color:var(--text2)" id="zone-up-status">74° · Cooling</div>
+        </button>
+      </div>
+
       <!-- Nest-style thermostat dial -->
       <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:8px">
         <div style="position:relative;width:220px;height:220px;margin-bottom:16px">
           <svg viewBox="0 0 220 220" width="220" height="220">
-            <!-- Track -->
             <circle cx="110" cy="110" r="96" fill="none" stroke="#1a2235" stroke-width="12" stroke-linecap="round"
               stroke-dasharray="502" stroke-dashoffset="125" transform="rotate(135 110 110)"/>
-            <!-- Active arc -->
             <circle cx="110" cy="110" r="96" fill="none" stroke="url(#nestGrad)" stroke-width="12" stroke-linecap="round"
               stroke-dasharray="502" stroke-dashoffset="300" transform="rotate(135 110 110)" id="nestArc"/>
             <defs>
@@ -1469,15 +1481,12 @@ html, body {
               </linearGradient>
             </defs>
           </svg>
-          <!-- Center content -->
           <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
             <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px" id="nest-mode-label">COOLING TO</div>
             <div style="font-family:'Syne',sans-serif;font-size:58px;font-weight:800;line-height:1;color:var(--text)" id="thermoDisp">72°</div>
-            <div style="font-size:13px;color:var(--text2);margin-top:4px">inside <span style="color:var(--text3)">·</span> <span id="outside-temp">58°</span> outside</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px">inside <span style="color:var(--text3)">·</span> <span id="outside-temp">68°</span> outside</div>
           </div>
-          <!-- Minus button -->
           <button onclick="adjustTemp(-1)" style="position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;display:grid;place-items:center">−</button>
-          <!-- Plus button -->
           <button onclick="adjustTemp(1)" style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;display:grid;place-items:center">+</button>
         </div>
 
@@ -1488,7 +1497,7 @@ html, body {
             <div style="font-size:11px;color:var(--text3)">Target</div>
           </div>
           <div style="text-align:center">
-            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--green)">42%</div>
+            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--green)" id="humidity-disp">42%</div>
             <div style="font-size:11px;color:var(--text3)">Humidity</div>
           </div>
           <div style="text-align:center">
@@ -1556,8 +1565,8 @@ html, body {
       <!-- Connect Nest Banner -->
       <div style="background:linear-gradient(135deg,#0f1a0a,#0a1505);border:1px solid rgba(34,197,94,0.2);border-radius:18px;padding:20px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">🌡️</div>
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Nest Thermostat</div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Real-time temperature control and energy savings coming soon</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Nest Thermostats</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Both zones will show real-time temps and full control when connected</div>
         <div style="background:var(--green);border-radius:10px;padding:10px;color:#000;font-size:12px;font-weight:700">Nest API Integration — Coming Soon</div>
       </div>
 
@@ -2236,11 +2245,52 @@ function toggleGarage() {
 }
 
 // ── Climate ──
+let currentZone = 'down';
+const zoneDefaults = {
+  down: { temp: 72, mode: 'cool', humidity: '42%' },
+  up:   { temp: 74, mode: 'cool', humidity: '45%' }
+};
+
+function switchZone(zone) {
+  // Save current zone state
+  const savedTemp = parseInt(localStorage.getItem('ngc_temp_' + currentZone)) || zoneDefaults[currentZone].temp;
+  zoneDefaults[currentZone].temp = savedTemp;
+
+  currentZone = zone;
+  const z = zoneDefaults[zone];
+  const savedZoneTemp = parseInt(localStorage.getItem('ngc_temp_' + zone)) || z.temp;
+  const savedZoneMode = localStorage.getItem('ngc_climate_mode_' + zone) || z.mode;
+
+  // Update dial
+  ['thermoDisp','targetDisp','targetVal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = savedZoneTemp + '°';
+  });
+  document.getElementById('humidity-disp').textContent = z.humidity;
+  const arc = document.getElementById('nestArc');
+  if (arc) {
+    const pct = (savedZoneTemp - 60) / 25;
+    arc.setAttribute('stroke-dashoffset', Math.max(0, 502 - (pct * 377)));
+  }
+
+  // Update zone buttons
+  ['down','up'].forEach(z => {
+    const btn = document.getElementById('zone-btn-' + z);
+    if (btn) {
+      btn.style.background = z === zone ? 'var(--card2)' : 'var(--border2)';
+      btn.style.borderColor = z === zone ? 'var(--accent)' : 'var(--border)';
+      btn.querySelector('div:nth-child(2)').style.color = z === zone ? 'var(--accent)' : 'var(--text2)';
+    }
+  });
+
+  setClimateMode(savedZoneMode);
+}
 let targetTemp = 72;
 function adjustTemp(delta) {
-  const current = parseInt(localStorage.getItem('ngc_temp')) || 72;
+  const key = 'ngc_temp_' + currentZone;
+  const current = parseInt(localStorage.getItem(key)) || zoneDefaults[currentZone].temp;
   const temp = Math.max(60, Math.min(85, current + delta));
-  localStorage.setItem('ngc_temp', temp);
+  localStorage.setItem(key, temp);
   ['thermoDisp','targetDisp','targetVal'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = temp + '°';
@@ -2248,9 +2298,13 @@ function adjustTemp(delta) {
   const pct = (temp - 60) / 25;
   const arc = document.getElementById('nestArc');
   if (arc) arc.setAttribute('stroke-dashoffset', Math.max(0, 502 - (pct * 377)));
+  // Update zone card status
+  const zoneName = currentZone === 'down' ? 'Downstairs' : 'Upstairs';
+  const statusEl = document.getElementById('zone-' + currentZone + '-status');
+  if (statusEl) statusEl.textContent = temp + '° · ' + (localStorage.getItem('ngc_climate_mode_' + currentZone) || 'Cooling');
 }
 
-function setClimateMode(mode, btn) {
+function setClimateMode(mode) {
   const modes = {
     cool: { label:'COOLING TO', color:'var(--accent)', sub:'Cooling · Auto schedule on' },
     heat: { label:'HEATING TO', color:'var(--red)', sub:'Heating · Auto schedule on' },
@@ -2268,7 +2322,11 @@ function setClimateMode(mode, btn) {
   });
   const activeBtn = document.getElementById('mode-' + mode);
   if (activeBtn) { activeBtn.style.background = 'var(--card2)'; activeBtn.style.borderColor = c.color; activeBtn.style.color = c.color; }
-  localStorage.setItem('ngc_climate_mode', mode);
+  localStorage.setItem('ngc_climate_mode_' + currentZone, mode);
+  // Update zone card
+  const temp = parseInt(localStorage.getItem('ngc_temp_' + currentZone)) || zoneDefaults[currentZone].temp;
+  const statusEl = document.getElementById('zone-' + currentZone + '-status');
+  if (statusEl) statusEl.textContent = temp + '° · ' + mode.charAt(0).toUpperCase() + mode.slice(1) + 'ing';
 }
 
 function setMode(btn) {} // Legacy no-op
@@ -2329,12 +2387,8 @@ function startApp() {
   renderSpeakers();
   const savedMode = localStorage.getItem('ngc_arm_mode') || 'disarmed';
   setArmMode(savedMode);
-  const savedClimateMode = localStorage.getItem('ngc_climate_mode') || 'cool';
-  setClimateMode(savedClimateMode);
-  const savedTemp = parseInt(localStorage.getItem('ngc_temp')) || 72;
-  ['thermoDisp','targetDisp','targetVal'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.textContent = savedTemp + '°';
-  });
+  const savedClimateMode = localStorage.getItem('ngc_climate_mode_down') || 'cool';
+  switchZone('down');
 
   // Check for Spotify OAuth callback
   const urlParams = new URLSearchParams(window.location.search);
