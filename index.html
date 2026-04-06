@@ -1961,6 +1961,9 @@ function initSpotify() {
     if (dot) dot.className = 'svc-dot connected';
     const settingsSub = document.getElementById('spotify-settings-sub');
     if (settingsSub) settingsSub.textContent = 'Connected · ' + (user.display_name || user.email);
+    // Update home screen music tile
+    const musicTile = document.getElementById('quick-music');
+    if (musicTile) { musicTile.textContent = 'Connected'; musicTile.style.color = 'var(--spotify)'; }
     // Update quick control
     const qm = document.getElementById('quick-music');
     if (qm) { qm.textContent = 'Connected'; qm.style.color = 'var(--spotify)'; }
