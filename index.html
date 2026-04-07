@@ -1664,7 +1664,7 @@ html, body {
         <div class="profile-avatar" id="avatarInitial">D</div>
         <div>
           <div class="profile-name" id="profileName">Your Name</div>
-          <div class="profile-address" id="profileAddress">Your Cotton Lane Address</div>
+          <div class="profile-address" id="profileAddress">Kierland Place, Sacramento CA</div>
           <div style="margin-top:8px"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="height:16px;width:auto;opacity:0.5"></div>
         </div>
       </div>
@@ -1766,7 +1766,7 @@ html, body {
           <div class="sr-icon">🏢</div>
           <div class="sr-text">
             <div class="sr-label">Next Generation Capital</div>
-            <div class="sr-sub">Your home builder · Sacramento, CA</div>
+            <div class="sr-sub">Kierland Place · Sacramento, CA</div>
           </div>
           <div class="sr-right">›</div>
         </div>
@@ -2044,7 +2044,7 @@ function completeOnboarding() {
 
 function skipOnboarding() {
   state.userName = 'Homeowner';
-  state.address = 'My NGC Home';
+  state.address = 'Kierland Place';
   localStorage.setItem('ngc_name', state.userName);
   localStorage.setItem('ngc_address', state.address);
   applyUserData();
@@ -2798,9 +2798,9 @@ async function askAI(customMsg) {
   btn.textContent = '…';
   msgEl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
 
-  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Cotton Lane home in The Courtyards at Cotton Lane community by Next Generation Capital'}.
+  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a home at The Courtyards at Cotton Lane on Kierland Place, Sacramento CA'}.
 
-Home status: Devices are in setup mode — the homeowner has recently moved in and is still connecting their smart home devices through Alexa. Thermostat set to 72°F. Sonos speakers ready but not yet playing. Cameras and locks pending connection. Echo Dot in kitchen ready for Alexa commands. Samsung TVs connected. The home is part of The Courtyards at Cotton Lane, a Next Generation Capital community in Sacramento, CA.
+Home status: Devices are in setup mode — the homeowner has recently moved in and is still connecting their smart home devices through Alexa. Thermostat set to 72°F. Sonos speakers ready but not yet playing. Cameras and locks pending connection. Echo Dot in kitchen ready for Alexa commands. Samsung TVs connected. The home is part of The Courtyards at Cotton Lane on Kierland Place in Sacramento, CA — a Next Generation Capital community.
 
 Your name is Adie. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
 
