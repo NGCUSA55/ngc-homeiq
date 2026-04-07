@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HomeIQ">
+<meta name="apple-mobile-web-app-title" content="Cotton Lane HomeIQ">
 <meta name="theme-color" content="#080a0f">
-<title>NGC HomeIQ</title>
+<title>Cotton Lane HomeIQ</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <style>
@@ -1125,7 +1125,7 @@ html, body {
   <img class="adie-splash-portrait" id="adieSplashImg" src="./adie.png" alt="Adie" />
   <div class="adie-splash-name" id="adieSplashName">ADIE</div>
   <div class="adie-splash-sub" id="adieSplashSub">Your Home Assistant</div>
-  <div class="adie-splash-ngc">NGC HomeIQ · Next Generation Capital</div>
+  <div class="adie-splash-ngc">Cotton Lane · Next Generation Capital</div>
 </div>
 
 <div class="ambient"></div>
@@ -1134,9 +1134,9 @@ html, body {
 <div id="onboarding">
   <div class="ob-logo"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:52px;height:auto;object-fit:contain;filter:brightness(0) invert(1)"></div>
   <div class="ob-title">Welcome Home</div>
-  <div class="ob-sub">Your NGC smart home is ready. Let's get you set up in under a minute.</div>
+  <div class="ob-sub">Your Cotton Lane smart home is ready. Let's get you set up in under a minute.</div>
   <div class="ob-name-row">
-    <input class="ob-input" id="ob-firstname" placeholder="Your first name (e.g. Donnie)" type="text" />
+    <input class="ob-input" id="ob-firstname" placeholder="Your first name (e.g. Alex)" type="text" />
     <input class="ob-input" id="ob-address" placeholder="Home nickname (e.g. The Hanly House)" type="text" />
   </div>
   <div class="ob-steps">
@@ -1155,7 +1155,7 @@ html, body {
   </div>
   <button class="ob-btn" onclick="completeOnboarding()">Set Up My Home →</button>
   <div onclick="skipOnboarding()" style="color:var(--text3);font-size:12px;margin-top:12px;cursor:pointer;text-align:center">Skip for now</div>
-  <div class="ob-powered">Powered by NGC HomeIQ™ · Next Generation Capital</div>
+  <div class="ob-powered">Cotton Lane HomeIQ™ · Next Generation Capital</div>
 </div>
 
 <!-- ══ APP SHELL ══ -->
@@ -1167,7 +1167,7 @@ html, body {
       <div class="hero-top">
         <div>
           <img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="Next Generation Capital" style="height:22px;width:auto;margin-bottom:8px;opacity:0.7;display:block">
-          <div class="hero-greeting" id="greeting">Good morning,<br><span id="userName">Donnie</span>.</div>
+          <div class="hero-greeting" id="greeting">Good morning,<br><span id="userName">Homeowner</span>.</div>
           <div class="hero-sub" id="heroSub">Your home is secure · All systems normal</div>
         </div>
         <div class="hero-time">
@@ -1208,7 +1208,7 @@ html, body {
             <div class="ai-name">Adie</div>
           </div>
         </div>
-        <div class="ai-msg" id="aiMsg">Hey <span id="aiName" class="adie-highlight">Donnie</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?</div>
+        <div class="ai-msg" id="aiMsg">Hey <span id="aiName" class="adie-highlight">there</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?</div>
         <div class="ai-input-row">
           <input class="ai-input" id="aiInput" placeholder="Ask Adie anything…" type="text" />
           <button class="ai-send" id="aiSend" onclick="askAI()">→</button>
@@ -1260,7 +1260,7 @@ html, body {
           <div class="tile-label">Front Door</div>
           <div class="tile-val green" id="quick-lockval-front">Locked</div>
         </div>
-        <!-- Garage · MyQ -->
+        <!-- Garage Door -->
         <div class="tile" id="tile-garage" onclick="toggleGarageMyQ()">
           <div class="tile-icon">🏠</div>
           <div class="tile-label">Garage</div>
@@ -1283,7 +1283,7 @@ html, body {
       <div class="ngc-footer">
         <div class="ngc-footer-inner">
           <div class="ngc-logo-sm"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:28px;height:auto;filter:brightness(0) invert(0.6)"></div>
-          <div class="ngc-footer-text">A <span>Next Generation Capital</span> smart home</div>
+          <div class="ngc-footer-text">A <span>Cotton Lane</span> smart home</div>
         </div>
       </div>
     </div>
@@ -1293,7 +1293,7 @@ html, body {
   <!-- MUSIC SCREEN -->
   <div id="screen-music" class="screen">
     <div class="music-hero">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">The Courtyards at Cotton Lane</div>
       <div class="page-title">Music</div>
       <div class="page-sub">Sonos · Whole home audio</div>
     </div>
@@ -1392,9 +1392,9 @@ html, body {
   <!-- SECURITY SCREEN -->
   <div id="screen-security" class="screen">
     <div class="security-status">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">The Courtyards at Cotton Lane</div>
       <div class="page-title">Security</div>
-      <div class="page-sub" id="sec-sub">Ring · ADT Professional Monitoring</div>
+      <div class="page-sub" id="sec-sub">Smart Security · Powered by HomeIQ</div>
     </div>
 
     <div class="section">
@@ -1459,39 +1459,20 @@ html, body {
         <div class="sec-action" onclick="addCamera()">+ Add</div>
       </div>
       <div id="cameras-list">
-        <div class="cam-card">
-          <div class="cam-view">
-            <div class="cam-overlay-text">HD LIVE FEED</div>
-            <div class="cam-live"><div class="live-dot"></div>LIVE</div>
-            <div class="cam-time-stamp" id="camStamp">00:00:00</div>
+        <!-- Doorbell camera connect state -->
+        <div class="connect-card" onclick="alert('Connect your doorbell camera through your Alexa account. Works with Ring, Arlo, Blink, Eufy, Wyze and most major brands.')">
+          <div class="connect-card-icon">📷</div>
+          <div class="connect-card-text">
+            <div class="connect-card-title">Connect Doorbell Camera</div>
+            <div class="connect-card-sub">Works with Ring, Arlo, Blink, Eufy, Wyze & more — connect via Alexa</div>
           </div>
-          <div class="cam-footer">
-            <div>
-              <div class="cam-name">Front Door · Ring Video Doorbell</div>
-              <div class="cam-sub">Motion: 7:14 AM · Battery 82%</div>
-            </div>
-            <span class="pill pill-blue">HD</span>
-          </div>
-        </div>
-        <div class="cam-card">
-          <div class="cam-view" style="background:linear-gradient(160deg,#0a180e,#060e08,#08140a)">
-            <div class="cam-overlay-text">HD LIVE FEED</div>
-            <div class="cam-live"><div class="live-dot"></div>LIVE</div>
-            <div class="cam-time-stamp" id="camStamp2">00:00:00</div>
-          </div>
-          <div class="cam-footer">
-            <div>
-              <div class="cam-name">Backyard · Ring Stick Up Cam</div>
-              <div class="cam-sub">No motion today · Wired</div>
-            </div>
-            <span class="pill pill-blue">HD</span>
-          </div>
+          <div class="connect-card-cta">Connect</div>
         </div>
         <div onclick="addCamera()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:16px;cursor:pointer;margin-top:8px">
           <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">📷</div>
           <div>
             <div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Camera</div>
-            <div style="font-size:12px;color:var(--text2)">Ring cameras · Add more Ring devices</div>
+            <div style="font-size:12px;color:var(--text2)">Compatible with all major camera brands</div>
           </div>
         </div>
       </div>
@@ -1514,22 +1495,24 @@ html, body {
         </div>
         <div class="lock-card locked" id="lock-garage" onclick="toggleGarageMyQ()" style="border-color:rgba(34,197,94,0.2)">
           <div class="lock-icon">🏠</div>
-          <div class="lock-label">Garage · MyQ</div>
+          <div class="lock-label">Garage Door</div>
           <div class="lock-val closed" id="lockval-garage">Closed</div>
         </div>
-        <div class="lock-card" style="border-color:rgba(59,130,246,0.2)">
+        <div class="lock-card" style="border-color:rgba(255,255,255,0.06);opacity:0.55" onclick="alert('Your doorbell will appear here once connected through Alexa.')">
           <div class="lock-icon">🔔</div>
-          <div class="lock-label">Ring Doorbell</div>
-          <div class="lock-val" style="color:var(--accent)">Armed</div>
+          <div class="lock-label">Doorbell</div>
+          <div class="lock-val" style="color:var(--text3)">Connect</div>
         </div>
       </div>
 
-      <!-- ADT Professional Monitoring -->
-      <div style="background:linear-gradient(135deg,#0a0f1a,#0d1520);border:1px solid rgba(0,96,169,0.3);border-radius:18px;padding:20px;text-align:center;margin-top:8px">
-        <div style="font-size:32px;margin-bottom:8px">🛡️</div>
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px;color:#0060A9">ADT Professional Monitoring</div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">24/7 professional monitoring active · Manage your ADT system</div>
-        <div onclick="openADT()" style="background:#0060A9;border-radius:10px;padding:10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Open ADT App →</div>
+      <!-- Professional Monitoring Connect Card -->
+      <div class="connect-card" style="margin-top:8px" onclick="alert('Professional monitoring setup is available once your Cotton Lane home security package is activated. Contact your NGC representative for details.')">
+        <div class="connect-card-icon">🛡️</div>
+        <div class="connect-card-text">
+          <div class="connect-card-title">Professional Monitoring</div>
+          <div class="connect-card-sub">24/7 monitoring included with your Cotton Lane home · Tap to activate</div>
+        </div>
+        <div class="connect-card-cta">Activate</div>
       </div>
 
     </div>
@@ -1539,7 +1522,7 @@ html, body {
   <!-- CLIMATE SCREEN -->
   <div id="screen-climate" class="screen">
     <div class="climate-hero">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">The Courtyards at Cotton Lane</div>
       <div class="page-title">Climate</div>
       <div class="page-sub" id="climate-sub">Cooling · Auto schedule on</div>
     </div>
@@ -1671,7 +1654,7 @@ html, body {
   <!-- SETTINGS SCREEN -->
   <div id="screen-settings" class="screen">
     <div class="page-header">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">The Courtyards at Cotton Lane</div>
       <div class="page-title">My Home</div>
     </div>
 
@@ -1680,8 +1663,8 @@ html, body {
       <div class="profile-card">
         <div class="profile-avatar" id="avatarInitial">D</div>
         <div>
-          <div class="profile-name" id="profileName">Donnie & Kristina</div>
-          <div class="profile-address" id="profileAddress">4821 Ventris Court</div>
+          <div class="profile-name" id="profileName">Your Name</div>
+          <div class="profile-address" id="profileAddress">Your Cotton Lane Address</div>
           <div style="margin-top:8px"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="height:16px;width:auto;opacity:0.5"></div>
         </div>
       </div>
@@ -1708,26 +1691,26 @@ html, body {
         <div class="setting-row">
           <div class="sr-icon">🔔</div>
           <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>Ring Security</div>
-            <div class="sr-sub">Doorbell + 1 camera connected</div>
+            <div class="sr-label"><span class="svc-dot connected"></span>Smart Security</div>
+            <div class="sr-sub">Connect your doorbell & cameras</div>
           </div>
           <div class="sr-val" onclick="goTo('security')" style="cursor:pointer;color:var(--accent)">→</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🛡️</div>
           <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>ADT Monitoring</div>
-            <div class="sr-sub">24/7 professional monitoring active</div>
+            <div class="sr-label"><span class="svc-dot"></span>Professional Monitoring</div>
+            <div class="sr-sub">Tap to activate with your security provider</div>
           </div>
-          <div class="sr-val" onclick="openADT()" style="cursor:pointer;color:#0060A9">Open →</div>
+          <div class="sr-val" onclick="alert('Contact your NGC representative to activate monitoring.')" style="cursor:pointer;color:var(--accent)">Set Up</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🏠</div>
           <div class="sr-text">
-            <div class="sr-label"><span class="svc-dot connected"></span>MyQ Garage</div>
-            <div class="sr-sub">2-car garage · Connected</div>
+            <div class="sr-label"><span class="svc-dot"></span>Garage Door</div>
+            <div class="sr-sub">Connect your smart garage opener via Alexa</div>
           </div>
-          <div class="sr-val" onclick="openMyQ()" style="cursor:pointer;color:var(--accent)">→</div>
+          <div class="sr-val" onclick="alert('Connect your smart garage opener through your Alexa account.')" style="cursor:pointer;color:var(--accent)">Connect</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🌡️</div>
@@ -1800,7 +1783,7 @@ html, body {
       <div class="ngc-footer">
         <div class="ngc-footer-inner">
           <div class="ngc-logo-sm"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:28px;height:auto;filter:brightness(0) invert(0.6)"></div>
-          <div class="ngc-footer-text">NGC HomeIQ™ v1.0 · <span>Next Generation Capital</span></div>
+          <div class="ngc-footer-text">Cotton Lane HomeIQ™ · <span>Next Generation Capital</span></div>
         </div>
       </div>
     </div>
@@ -1810,7 +1793,7 @@ html, body {
   <!-- TV REMOTE SCREEN -->
   <div id="screen-tv" class="screen">
     <div class="tv-hero">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">The Courtyards at Cotton Lane</div>
       <div class="page-title">Samsung TV</div>
       <div class="page-sub">SmartThings · <span id="tv-room-label">Living Room</span></div>
     </div>
@@ -2129,7 +2112,7 @@ function updateClock() {
   if (dd) dd.textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
   const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   const ge = document.getElementById('greeting');
-  if (ge) ge.innerHTML = `${greet},<br><span id="userName">${state.userName || 'Donnie'}</span>.`;
+  if (ge) ge.innerHTML = `${greet},<br><span id="userName">${state.userName || 'Homeowner'}</span>.`;
   const ts = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
   ['camStamp','camStamp2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ts; });
 }
@@ -2420,7 +2403,7 @@ function setArmMode(mode) {
 }
 
 function addCamera() {
-  alert('Camera setup: When Ring API access is approved, this will walk you through connecting your Ring cameras. For now the demo shows what the live view will look like.');
+  alert('Camera setup: Connect your doorbell camera or any compatible smart camera through your Alexa account.');
 }
 function addSpeaker() {
   const name = prompt('Speaker name (e.g. Living Room, Kitchen):');
@@ -2815,9 +2798,9 @@ async function askAI(customMsg) {
   btn.textContent = '…';
   msgEl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
 
-  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Ventris Place home'}.
+  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Cotton Lane home in The Courtyards at Cotton Lane community by Next Generation Capital'}.
 
-Home status: Front door locked, back door locked, garage closed (MyQ connected), thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
+Home status: Devices are in setup mode — the homeowner has recently moved in and is still connecting their smart home devices through Alexa. Thermostat set to 72°F. Sonos speakers ready but not yet playing. Cameras and locks pending connection. Echo Dot in kitchen ready for Alexa commands. Samsung TVs connected. The home is part of The Courtyards at Cotton Lane, a Next Generation Capital community in Sacramento, CA.
 
 Your name is Adie. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
 
