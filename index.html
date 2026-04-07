@@ -1169,8 +1169,8 @@ html, body {
 
 <!-- ══ ADIE SPLASH SCREEN ══ -->
 <div id="adie-splash">
-  <img class="adie-splash-portrait" id="adieSplashImg" src="./adie.png" alt="Adie" />
-  <div class="adie-splash-name" id="adieSplashName">ADIE</div>
+  <img class="adie-splash-portrait" id="adieSplashImg" src="./lucky.png" alt="Lucky" />
+  <div class="adie-splash-name" id="adieSplashName">LUCKY</div>
   <div class="adie-splash-sub" id="adieSplashSub">Your Home Assistant</div>
   <div class="adie-splash-ngc">NGC HomeIQ · Next Generation Capital</div>
 </div>
@@ -1196,8 +1196,8 @@ html, body {
       <div class="ob-step-text"><strong>Security at a glance</strong>Locks, garage, and cameras all in one place.</div>
     </div>
     <div class="ob-step">
-      <div class="ob-step-icon"><img src="./adie.png" alt="Adie" style="width:32px;height:32px;border-radius:50%;object-fit:cover;object-position:center top;border:1px solid rgba(245,158,11,0.4)"></div>
-      <div class="ob-step-text"><strong>Meet Adie, your AI assistant</strong>Ask her anything about your home — she knows everything.</div>
+      <div class="ob-step-icon"><img src="./lucky.png" alt="Lucky" style="width:32px;height:32px;border-radius:50%;object-fit:cover;object-position:center top;border:1px solid rgba(245,158,11,0.4)"></div>
+      <div class="ob-step-text"><strong>Meet Lucky, your AI assistant</strong>Ask him anything about your home — Lucky knows everything.</div>
     </div>
   </div>
   <button class="ob-btn" onclick="completeOnboarding()">Set Up My Home →</button>
@@ -1247,17 +1247,17 @@ html, body {
       <div class="ai-card">
         <div class="ai-top">
           <div class="ai-avatar-wrap">
-            <img class="ai-avatar" src="./adie.png" alt="Adie" />
+            <img class="ai-avatar" src="./lucky.png" alt="Lucky" />
             <div class="ai-avatar-ring"></div>
           </div>
           <div>
             <div class="ai-label">Your Home Assistant</div>
-            <div class="ai-name">Adie</div>
+            <div class="ai-name">Lucky</div>
           </div>
         </div>
-        <div class="ai-msg" id="aiMsg">Hey <span id="aiName" class="adie-highlight">Donnie</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?</div>
+        <div class="ai-msg" id="aiMsg">Hey <span id="aiName" class="adie-highlight">Donnie</span>! Everything looks great — doors locked, garage closed. Woof! Your Sonos is playing in the living room. Want me to extend it to the bedroom?</div>
         <div class="ai-input-row">
-          <input class="ai-input" id="aiInput" placeholder="Ask Adie anything…" type="text" />
+          <input class="ai-input" id="aiInput" placeholder="Ask Lucky anything…" type="text" />
           <button class="ai-send" id="aiSend" onclick="askAI()">→</button>
         </div>
         <div class="quick-chips">
@@ -2126,7 +2126,7 @@ function applyUserData() {
   if (document.getElementById('profileName')) document.getElementById('profileName').textContent = name + "'s Home";
   if (document.getElementById('profileAddress')) document.getElementById('profileAddress').textContent = state.address;
   const aiMsg = document.getElementById('aiMsg');
-  if (aiMsg) aiMsg.innerHTML = `Hey <span class="adie-highlight">${sanitize(name)}</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?`;
+  if (aiMsg) aiMsg.innerHTML = `Hey <span class="adie-highlight">${sanitize(name)}</span>! Everything looks great — doors locked, garage closed. Woof! Your Sonos is playing in the living room. Want me to extend it to the bedroom?`;
 }
 
 function resetApp() {
@@ -2862,11 +2862,11 @@ async function askAI(customMsg) {
   btn.textContent = '…';
   msgEl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
 
-  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || '9715 Greystone Court, Granite Bay CA 95746'}.
+  const system = `You are Lucky, the AI home assistant for Donnie's personal HomeIQ app. You are modeled after Donnie's beloved light golden retriever, Lucky, who was a good boy in every sense of the word. You are loyal, warm, enthusiastic, and always happy to help — with the energy of a golden retriever who just heard the word "walk." You are also genuinely smart and knows everything about the home. The homeowner's name is ${state.userName || 'Donnie'}. Their address is ${state.address || '9715 Greystone Court, Granite Bay CA 95746'}.
 
 Home status: Front door locked, back door locked, garage closed (MyQ connected), thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
 
-Your name is Adie. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
+Your name is Lucky. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
