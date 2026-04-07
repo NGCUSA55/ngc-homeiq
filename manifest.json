@@ -1,0 +1,17 @@
+{
+  "name": "NGC HomeIQ",
+  "short_name": "HomeIQ",
+  "description": "Smart home control for Next Generation Capital homes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080a0f",
+  "theme_color": "#080a0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

@@ -65,7 +65,7 @@ html, body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 0 calc(var(--nav-h) + var(--safe-bottom) + 8px);
+  padding: 0 0 calc(var(--nav-h) + var(--safe-bottom) + 24px);
   scrollbar-width: none;
 }
 .screen::-webkit-scrollbar { display: none; }
@@ -90,7 +90,7 @@ html, body {
 .nav-btn {
   display: flex; flex-direction: column;
   align-items: center; gap: 4px;
-  padding: 6px 16px;
+  padding: 6px 10px;
   cursor: pointer;
   border: none; background: none;
   transition: transform 0.15s;
@@ -102,7 +102,7 @@ html, body {
   transition: opacity 0.2s, transform 0.2s;
 }
 .nav-label {
-  font-size: 9px; font-weight: 600;
+  font-size: 8px; font-weight: 600;
   color: var(--text3);
   text-transform: uppercase; letter-spacing: 0.8px;
   transition: color 0.2s;
@@ -1046,7 +1046,7 @@ html, body {
   <div class="ob-sub">Your NGC smart home is ready. Let's get you set up in under a minute.</div>
   <div class="ob-name-row">
     <input class="ob-input" id="ob-firstname" placeholder="Your first name (e.g. Donnie)" type="text" />
-    <input class="ob-input" id="ob-address" placeholder="House nickname (e.g. The Hanly House)" type="text" />
+    <input class="ob-input" id="ob-address" placeholder="Home nickname (e.g. The Hanly House)" type="text" />
   </div>
   <div class="ob-steps">
     <div class="ob-step">
@@ -1094,7 +1094,7 @@ html, body {
           <div class="sp-label">Inside</div>
         </div>
         <div class="stat-pill" onclick="goTo('climate')">
-          <div class="sp-val" style="color:var(--accent)" id="stat-outside">--°</div>
+          <div class="sp-val" style="color:var(--accent)" id="stat-outside">···</div>
           <div class="sp-label">Outside</div>
         </div>
         <div class="stat-pill" onclick="goTo('music')">
@@ -1484,7 +1484,7 @@ html, body {
           <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
             <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px" id="nest-mode-label">COOLING TO</div>
             <div style="font-family:'Syne',sans-serif;font-size:58px;font-weight:800;line-height:1;color:var(--text)" id="thermoDisp">72°</div>
-            <div style="font-size:13px;color:var(--text2);margin-top:4px">inside <span style="color:var(--text3)">·</span> <span id="outside-temp">68°</span> outside</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px">inside <span style="color:var(--text3)">·</span> <span id="outside-temp">···</span> outside</div>
           </div>
           <button onclick="adjustTemp(-1)" style="position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;display:grid;place-items:center">−</button>
           <button onclick="adjustTemp(1)" style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;display:grid;place-items:center">+</button>
@@ -1565,9 +1565,9 @@ html, body {
       <!-- Connect Nest Banner -->
       <div style="background:linear-gradient(135deg,#0f1a0a,#0a1505);border:1px solid rgba(34,197,94,0.2);border-radius:18px;padding:20px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">🌡️</div>
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Nest Thermostats</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Ecobee Thermostats</div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Both zones will show real-time temps and full control when connected</div>
-        <div style="background:var(--green);border-radius:10px;padding:10px;color:#000;font-size:12px;font-weight:700">Nest API Integration — Coming Soon</div>
+        <div style="background:var(--green);border-radius:10px;padding:10px;color:#000;font-size:12px;font-weight:700">Ecobee API Integration — Coming Soon</div>
       </div>
 
     </div>
@@ -1622,8 +1622,16 @@ html, body {
         <div class="setting-row">
           <div class="sr-icon">🌡️</div>
           <div class="sr-text">
-            <div class="sr-label">Nest Thermostat</div>
+            <div class="sr-label">Ecobee Thermostat</div>
             <div class="sr-sub">API integration coming soon</div>
+          </div>
+          <div class="sr-val" style="color:var(--text3)">Soon</div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-icon">📺</div>
+          <div class="sr-text">
+            <div class="sr-label">Samsung SmartThings</div>
+            <div class="sr-sub">TV remote control coming soon</div>
           </div>
           <div class="sr-val" style="color:var(--text3)">Soon</div>
         </div>
@@ -1689,6 +1697,175 @@ html, body {
     <div class="spacer"></div>
   </div>
 
+  <!-- TV REMOTE SCREEN -->
+  <div id="screen-tv" class="screen">
+    <div class="tv-hero">
+      <div class="page-eyebrow">NGC HomeIQ</div>
+      <div class="page-title">Samsung TV</div>
+      <div class="page-sub">SmartThings · <span id="tv-room-label">Living Room</span></div>
+    </div>
+
+    <div class="section">
+      <!-- TV Display Card -->
+      <div class="tv-display-card">
+        <div class="tv-screen" id="tv-screen">
+          <div class="tv-screen-bg"></div>
+          <div class="tv-screen-content" id="tv-screen-content">
+            <div class="tv-app-icon" id="tv-app-icon">🎬</div>
+            <div class="tv-app-name" id="tv-app-name">Netflix</div>
+            <div class="tv-app-sub" id="tv-app-sub">Ready to stream</div>
+          </div>
+          <div class="tv-off-msg">
+            <div class="tv-off-icon">⏻</div>
+            <div class="tv-off-text">TV Off</div>
+          </div>
+          <div class="tv-badge">
+            <div class="tv-input-badge" id="tv-input-badge">HDMI 1</div>
+          </div>
+          <div class="tv-vol-badge">
+            <div class="tv-vol-bar-wrap" id="tv-vol-bar">
+              <div class="tv-vol-dots" id="tv-vol-dots"></div>
+              <div class="tv-vol-label" id="tv-vol-label">15</div>
+            </div>
+          </div>
+        </div>
+        <div class="tv-footer">
+          <div class="tv-name-area">
+            <div class="tv-name" id="tv-name">Samsung 65" QLED</div>
+            <div class="tv-sub" id="tv-sub">SmartThings · On</div>
+          </div>
+          <button class="tv-power-btn on" id="tv-power-btn" onclick="tvTogglePower()">⏻</button>
+        </div>
+      </div>
+
+      <!-- Room Selector -->
+      <div class="tv-rooms">
+        <button class="tv-room-btn selected" id="tv-room-living" onclick="tvSelectRoom('living')">
+          <div class="tv-room-icon">🛋️</div>
+          <div>
+            <div class="tv-room-name">Living Room</div>
+            <div class="tv-room-status">Samsung 65" QLED</div>
+          </div>
+        </button>
+        <button class="tv-room-btn" id="tv-room-bedroom" onclick="tvSelectRoom('bedroom')">
+          <div class="tv-room-icon">🛏️</div>
+          <div>
+            <div class="tv-room-name">Bedroom</div>
+            <div class="tv-room-status">Samsung 50" Crystal</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Remote Control -->
+      <div class="remote">
+        <!-- D-Pad -->
+        <div class="remote-section">
+          <div class="remote-label">Navigation</div>
+          <div class="dpad">
+            <button class="dpad-btn dpad-up" onclick="tvDpad('up')">▲</button>
+            <button class="dpad-btn dpad-down" onclick="tvDpad('down')">▼</button>
+            <button class="dpad-btn dpad-left" onclick="tvDpad('left')">◀</button>
+            <button class="dpad-btn dpad-right" onclick="tvDpad('right')">▶</button>
+            <button class="dpad-btn dpad-ok" onclick="tvDpad('ok')">OK</button>
+          </div>
+        </div>
+
+        <!-- Playback -->
+        <div class="remote-section">
+          <div class="remote-label">Playback</div>
+          <div class="btn-row">
+            <button class="rmt-btn" onclick="tvBtn(this)">
+              <div class="rmt-icon">⏪</div>
+              <div class="rmt-label">Rewind</div>
+            </button>
+            <button class="rmt-btn accent-btn" onclick="tvBtn(this)">
+              <div class="rmt-icon" id="tv-play-icon">⏸</div>
+              <div class="rmt-label" id="tv-play-label">Pause</div>
+            </button>
+            <button class="rmt-btn" onclick="tvBtn(this)">
+              <div class="rmt-icon">⏩</div>
+              <div class="rmt-label">Forward</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="remote-section">
+          <div class="remote-label">Controls</div>
+          <div class="btn-row">
+            <button class="rmt-btn" onclick="tvBtn(this)">
+              <div class="rmt-icon">←</div>
+              <div class="rmt-label">Back</div>
+            </button>
+            <button class="rmt-btn" onclick="tvBtn(this)">
+              <div class="rmt-icon">⌂</div>
+              <div class="rmt-label">Home</div>
+            </button>
+            <button class="rmt-btn" onclick="tvBtn(this)">
+              <div class="rmt-icon">☰</div>
+              <div class="rmt-label">Menu</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Volume -->
+        <div class="remote-section">
+          <div class="remote-label">Volume</div>
+          <div class="vol-control-row">
+            <button class="vol-ctrl-btn" onclick="tvVolume(-1)">−</button>
+            <div class="vol-track">
+              <div style="height:100%;width:50%;background:var(--accent);border-radius:4px;transition:width 0.2s" id="tv-vol-fill"></div>
+            </div>
+            <button class="vol-ctrl-btn" onclick="tvVolume(1)">+</button>
+            <button class="vol-ctrl-btn" onclick="tvMute()" id="tv-mute-btn" style="font-size:16px">🔊</button>
+          </div>
+        </div>
+
+        <!-- Quick Apps -->
+        <div class="remote-section">
+          <div class="remote-label">Apps</div>
+          <div class="btn-row">
+            <button class="rmt-btn" onclick="tvApp('netflix','🎬','Netflix')">
+              <div class="rmt-icon">🎬</div>
+              <div class="rmt-label">Netflix</div>
+            </button>
+            <button class="rmt-btn" onclick="tvApp('youtube','📺','YouTube')">
+              <div class="rmt-icon">📺</div>
+              <div class="rmt-label">YouTube</div>
+            </button>
+            <button class="rmt-btn" onclick="tvApp('hulu','🟢','Hulu')">
+              <div class="rmt-icon">🟢</div>
+              <div class="rmt-label">Hulu</div>
+            </button>
+            <button class="rmt-btn" onclick="tvApp('disney','✨','Disney+')">
+              <div class="rmt-icon">✨</div>
+              <div class="rmt-label">Disney+</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Power -->
+        <div class="remote-section" style="margin-bottom:0">
+          <div class="btn-row">
+            <button class="rmt-btn red-btn" onclick="tvTogglePower()" style="flex:1">
+              <div class="rmt-icon" style="color:var(--red)">⏻</div>
+              <div class="rmt-label" style="color:var(--red)">Power</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connect SmartThings Banner -->
+      <div style="background:linear-gradient(135deg,#0a0f1a,#0d1520);border:1px solid rgba(59,130,246,0.2);border-radius:18px;padding:20px;text-align:center;margin-top:12px">
+        <div style="font-size:32px;margin-bottom:8px">📺</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect SmartThings</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Connect your Samsung TV via SmartThings for full remote control</div>
+        <div style="background:var(--accent);border-radius:10px;padding:10px;color:#fff;font-size:12px;font-weight:700">SmartThings Integration — Coming Soon</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div id="nav">
     <button class="nav-btn active" onclick="goTo('home')">
@@ -1711,6 +1888,11 @@ html, body {
       <div class="nav-label">Climate</div>
       <div class="nav-pip"></div>
     </button>
+    <button class="nav-btn" onclick="goTo('tv')">
+      <div class="nav-icon">📺</div>
+      <div class="nav-label">TV</div>
+      <div class="nav-pip"></div>
+    </button>
     <button class="nav-btn" onclick="goTo('settings')">
       <div class="nav-icon">⚙️</div>
       <div class="nav-label">My Home</div>
@@ -1725,6 +1907,12 @@ html, body {
    NGC HomeIQ — App Logic
 ══════════════════════════════════════ */
 
+function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // ── State ──
 const state = {
   userName: '',
@@ -1738,6 +1926,12 @@ const state = {
   frontLocked: true,
   backLocked: true,
   garageClosed: true,
+  tvOn: true,
+  tvVolume: 15,
+  tvMuted: false,
+  tvApp: 'netflix',
+  tvRoom: 'living',
+  tvPlaying: true,
 };
 
 // ── Onboarding ──
@@ -1765,6 +1959,8 @@ function skipOnboarding() {
   document.getElementById('app').style.display = 'flex';
   startApp();
 }
+
+function applyUserData() {
   const name = state.userName;
   const initial = name.charAt(0).toUpperCase();
   if (document.getElementById('userName')) document.getElementById('userName').textContent = name;
@@ -1773,7 +1969,7 @@ function skipOnboarding() {
   if (document.getElementById('profileName')) document.getElementById('profileName').textContent = name + "'s Home";
   if (document.getElementById('profileAddress')) document.getElementById('profileAddress').textContent = state.address;
   const aiMsg = document.getElementById('aiMsg');
-  if (aiMsg) aiMsg.innerHTML = `Hey ${name}! Everything looks great. Doors are locked, garage is closed. Your Sonos is playing in the living room — want me to extend it to the bedroom?`;
+  if (aiMsg) aiMsg.innerHTML = `Hey ${sanitize(name)}! Everything looks great. Doors are locked, garage is closed. Your Sonos is playing in the living room — want me to extend it to the bedroom?`;
 }
 
 function resetApp() {
@@ -1801,7 +1997,7 @@ function goTo(screen) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
-  const navMap = { home: 0, music: 1, security: 2, climate: 3, settings: 4 };
+  const navMap = { home: 0, music: 1, security: 2, climate: 3, tv: 4, settings: 5 };
   const navBtns = document.querySelectorAll('.nav-btn');
   if (navMap[screen] !== undefined) navBtns[navMap[screen]].classList.add('active');
   document.getElementById('screen-' + screen).scrollTop = 0;
@@ -2141,7 +2337,7 @@ function renderSpeakers() {
   list.innerHTML = speakers.map((s, i) => `
     <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px">
       <div style="font-size:24px">${icons[i % icons.length]}</div>
-      <div style="flex:1"><div style="font-size:14px;font-weight:600">${s}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600">${sanitize(s)}</div>
       <div style="font-size:11px;color:var(--spotify)">● Ready</div></div>
       <div onclick="removeSpeaker(${i})" style="color:var(--text3);font-size:18px;cursor:pointer;padding:4px">✕</div>
     </div>`).join('') +
@@ -2278,25 +2474,7 @@ function openMyQ() {
 }
 
 function toggleGarage() { openMyQ(); } // Legacy — redirect to myQ
-}
 
-// ── Outside Temperature ──
-async function fetchOutsideTemp() {
-  try {
-    // Sacramento coordinates — when Nest connects this will use home's location
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.5816&longitude=-121.4944&current=temperature_2m&temperature_unit=fahrenheit&timezone=America/Los_Angeles');
-    const data = await res.json();
-    const temp = Math.round(data.current?.temperature_2m);
-    if (temp) {
-      // Update hero pill
-      const statOutside = document.getElementById('stat-outside');
-      if (statOutside) statOutside.textContent = temp + '°';
-      // Update climate dial
-      const outsideEl = document.getElementById('outside-temp');
-      if (outsideEl) outsideEl.textContent = temp + '°';
-    }
-  } catch(e) { /* silent fail */ }
-}
 let currentZone = 'down';
 const zoneDefaults = {
   down: { temp: 72, mode: 'cool', humidity: '42%' },
@@ -2383,6 +2561,100 @@ function setClimateMode(mode) {
 
 function setMode(btn) {} // Legacy no-op
 
+// ── TV Remote ──
+function tvTogglePower() {
+  state.tvOn = !state.tvOn;
+  const screen = document.getElementById('tv-screen');
+  const powerBtn = document.getElementById('tv-power-btn');
+  const sub = document.getElementById('tv-sub');
+  if (screen) screen.classList.toggle('off', !state.tvOn);
+  if (powerBtn) powerBtn.classList.toggle('on', state.tvOn);
+  if (sub) sub.textContent = 'SmartThings · ' + (state.tvOn ? 'On' : 'Off');
+}
+
+function tvDpad(dir) {
+  // Visual feedback only — flash the button
+  const btn = document.querySelector('.dpad-' + (dir === 'ok' ? 'ok' : dir));
+  if (btn) {
+    btn.style.background = 'var(--accent-glow)';
+    setTimeout(() => { btn.style.background = ''; }, 200);
+  }
+}
+
+function tvBtn(el) {
+  if (el) {
+    el.style.background = 'var(--accent-glow)';
+    setTimeout(() => { el.style.background = ''; }, 200);
+  }
+}
+
+function tvVolume(delta) {
+  if (!state.tvOn) return;
+  state.tvVolume = Math.max(0, Math.min(30, state.tvVolume + delta));
+  state.tvMuted = false;
+  tvUpdateVolDisplay();
+}
+
+function tvMute() {
+  if (!state.tvOn) return;
+  state.tvMuted = !state.tvMuted;
+  const muteBtn = document.getElementById('tv-mute-btn');
+  if (muteBtn) muteBtn.textContent = state.tvMuted ? '🔇' : '🔊';
+  tvUpdateVolDisplay();
+}
+
+function tvUpdateVolDisplay() {
+  const vol = state.tvMuted ? 0 : state.tvVolume;
+  const pct = (vol / 30) * 100;
+  const fill = document.getElementById('tv-vol-fill');
+  if (fill) fill.style.width = pct + '%';
+  const label = document.getElementById('tv-vol-label');
+  if (label) label.textContent = state.tvMuted ? 'Muted' : state.tvVolume;
+  // Update dots
+  const dotsEl = document.getElementById('tv-vol-dots');
+  if (dotsEl) {
+    let dots = '';
+    for (let i = 0; i < 15; i++) {
+      dots += `<div class="tv-vol-dot${i < Math.round(vol / 2) ? ' active' : ''}"></div>`;
+    }
+    dotsEl.innerHTML = dots;
+  }
+  // Show/hide volume bar overlay
+  const bar = document.getElementById('tv-vol-bar');
+  if (bar) {
+    bar.classList.add('show');
+    clearTimeout(bar._hideTimeout);
+    bar._hideTimeout = setTimeout(() => bar.classList.remove('show'), 2000);
+  }
+}
+
+function tvApp(id, icon, name) {
+  if (!state.tvOn) return;
+  state.tvApp = id;
+  const appIcon = document.getElementById('tv-app-icon');
+  const appName = document.getElementById('tv-app-name');
+  const appSub = document.getElementById('tv-app-sub');
+  if (appIcon) appIcon.textContent = icon;
+  if (appName) appName.textContent = name;
+  if (appSub) appSub.textContent = 'Ready to stream';
+}
+
+function tvSelectRoom(room) {
+  state.tvRoom = room;
+  const rooms = { living: { name: 'Living Room', tv: 'Samsung 65" QLED' }, bedroom: { name: 'Bedroom', tv: 'Samsung 50" Crystal' } };
+  const r = rooms[room];
+  // Update room buttons
+  ['living','bedroom'].forEach(id => {
+    const btn = document.getElementById('tv-room-' + id);
+    if (btn) btn.classList.toggle('selected', id === room);
+  });
+  // Update display
+  const tvName = document.getElementById('tv-name');
+  const roomLabel = document.getElementById('tv-room-label');
+  if (tvName) tvName.textContent = r.tv;
+  if (roomLabel) roomLabel.textContent = r.name;
+}
+
 // ── AI Assistant ──
 async function askAI(customMsg) {
   const input = document.getElementById('aiInput');
@@ -2397,14 +2669,20 @@ async function askAI(customMsg) {
 
   const system = `You are HomeIQ, the AI assistant for a Next Generation Capital smart home. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Ventris Place home'}. 
 
-Home status: Front door locked, back door locked, garage closed, thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, 2 Ring cameras active and all clear, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands.
+Home status: Front door locked, back door locked, garage closed, thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, 2 Ring cameras active and all clear, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom.
 
 Respond in 1-2 warm, natural sentences. Be helpful and conversational. Reference specific devices by name when relevant. Occasionally mention how their NGC smart home makes life easier. Never be robotic or formal.`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        // TODO: Move to backend proxy — API key should not be in client code
+        // 'x-api-key': 'YOUR_KEY_HERE'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -2414,8 +2692,8 @@ Respond in 1-2 warm, natural sentences. Be helpful and conversational. Reference
     });
     const data = await res.json();
     msgEl.textContent = data.content?.[0]?.text || "I'm having a moment — try again!";
-  } catch {
-    msgEl.textContent = "Connection issue. Check your WiFi and try again.";
+  } catch(e) {
+    msgEl.textContent = "HomeIQ AI needs a backend connection. This will work once Supabase is set up.";
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '→';
@@ -2445,9 +2723,8 @@ function startApp() {
   fetchWeather();
   setInterval(fetchWeather, 30 * 60 * 1000); // Refresh every 30 min
 
-  // Fetch outside temperature
-  fetchOutsideTemp();
-  setInterval(fetchOutsideTemp, 10 * 60 * 1000); // refresh every 10 min
+  // Init TV volume display
+  tvUpdateVolDisplay();
 
   // Sync quick controls with current state
   const qt = document.getElementById('quick-temp');
@@ -2467,6 +2744,7 @@ function startApp() {
 
 // ── Init ──
 checkOnboarding();
+updateClock(); // Always start clock even during onboarding
 </script>
 </body>
 </html>
