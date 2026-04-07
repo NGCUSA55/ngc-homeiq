@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HomeIQ">
+<meta name="apple-mobile-web-app-title" content="Bearstone">
 <meta name="theme-color" content="#080a0f">
-<title>NGC HomeIQ</title>
+<title>Bearstone</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <style>
@@ -1172,7 +1172,7 @@ html, body {
   <img class="adie-splash-portrait" id="adieSplashImg" src="./lucky.png" alt="Lucky" />
   <div class="adie-splash-name" id="adieSplashName">LUCKY</div>
   <div class="adie-splash-sub" id="adieSplashSub">Your Home Assistant</div>
-  <div class="adie-splash-ngc">NGC HomeIQ · Next Generation Capital</div>
+  <div class="adie-splash-ngc">Bearstone · Granite Bay, CA</div>
 </div>
 
 <div class="ambient"></div>
@@ -1340,7 +1340,7 @@ html, body {
   <!-- MUSIC SCREEN -->
   <div id="screen-music" class="screen">
     <div class="music-hero">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">Bearstone</div>
       <div class="page-title">Music</div>
       <div class="page-sub">Sonos · Whole home audio</div>
     </div>
@@ -1439,7 +1439,7 @@ html, body {
   <!-- SECURITY SCREEN -->
   <div id="screen-security" class="screen">
     <div class="security-status">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">Bearstone</div>
       <div class="page-title">Security</div>
       <div class="page-sub" id="sec-sub">Ring · ADT Professional Monitoring</div>
     </div>
@@ -1586,7 +1586,7 @@ html, body {
   <!-- CLIMATE SCREEN -->
   <div id="screen-climate" class="screen">
     <div class="climate-hero">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">Bearstone</div>
       <div class="page-title">Climate</div>
       <div class="page-sub" id="climate-sub">Cooling · Auto schedule on</div>
     </div>
@@ -1718,7 +1718,7 @@ html, body {
   <!-- SETTINGS SCREEN -->
   <div id="screen-settings" class="screen">
     <div class="page-header">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">Bearstone</div>
       <div class="page-title">My Home</div>
     </div>
 
@@ -1727,7 +1727,7 @@ html, body {
       <div class="profile-card">
         <div class="profile-avatar" id="avatarInitial">D</div>
         <div>
-          <div class="profile-name" id="profileName">Donnie & Kristina</div>
+          <div class="profile-name" id="profileName">Bearstone</div>
           <div class="profile-address" id="profileAddress">9715 Greystone Court, Granite Bay CA 95746</div>
           <div style="margin-top:8px"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="height:16px;width:auto;opacity:0.5"></div>
         </div>
@@ -1847,7 +1847,7 @@ html, body {
       <div class="ngc-footer">
         <div class="ngc-footer-inner">
           <div class="ngc-logo-sm"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:28px;height:auto;filter:brightness(0) invert(0.6)"></div>
-          <div class="ngc-footer-text">NGC HomeIQ™ v1.0 · <span>Next Generation Capital</span></div>
+          <div class="ngc-footer-text">Bearstone · <span>9715 Greystone Court</span></div>
         </div>
       </div>
     </div>
@@ -1857,7 +1857,7 @@ html, body {
   <!-- TV REMOTE SCREEN -->
   <div id="screen-tv" class="screen">
     <div class="tv-hero">
-      <div class="page-eyebrow">Donnie's HomeIQ</div>
+      <div class="page-eyebrow">Bearstone</div>
       <div class="page-title">Samsung TV</div>
       <div class="page-sub">SmartThings · <span id="tv-room-label">Living Room</span></div>
     </div>
@@ -2123,7 +2123,7 @@ function applyUserData() {
   if (document.getElementById('userName')) document.getElementById('userName').textContent = name;
   if (document.getElementById('aiName')) document.getElementById('aiName').textContent = name;
   if (document.getElementById('avatarInitial')) document.getElementById('avatarInitial').textContent = initial;
-  if (document.getElementById('profileName')) document.getElementById('profileName').textContent = name + "'s Home";
+  if (document.getElementById('profileName')) document.getElementById('profileName').textContent = state.homeName || (name + "'s Home");
   if (document.getElementById('profileAddress')) document.getElementById('profileAddress').textContent = state.address;
   const aiMsg = document.getElementById('aiMsg');
   if (aiMsg) aiMsg.innerHTML = `Hey <span class="adie-highlight">${sanitize(name)}</span>! Everything looks great — doors locked, garage closed. Woof! Your Sonos is playing in the living room. Want me to extend it to the bedroom?`;
@@ -2138,15 +2138,16 @@ function resetApp() {
 
 // Check if returning user
 function checkOnboarding() {
-  const savedName = localStorage.getItem('ngc_name');
-  if (savedName) {
-    state.userName = savedName;
-    state.address = localStorage.getItem('ngc_address') || 'My NGC Home';
-    applyUserData();
-    document.getElementById('onboarding').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    startApp();
-  }
+  // Personal branch — always skip onboarding, hardcoded to Bearstone
+  state.userName = 'Donnie';
+  state.address = '9715 Greystone Court, Granite Bay CA 95746';
+  state.homeName = 'Bearstone';
+  localStorage.setItem('ngc_name', state.userName);
+  localStorage.setItem('ngc_address', state.address);
+  applyUserData();
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  startApp();
 }
 
 // ── Navigation ──
