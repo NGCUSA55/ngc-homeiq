@@ -1728,7 +1728,7 @@ html, body {
         <div class="profile-avatar" id="avatarInitial">D</div>
         <div>
           <div class="profile-name" id="profileName">Donnie & Kristina</div>
-          <div class="profile-address" id="profileAddress">4821 Ventris Court</div>
+          <div class="profile-address" id="profileAddress">9715 Greystone Court, Granite Bay CA 95746</div>
           <div style="margin-top:8px"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="height:16px;width:auto;opacity:0.5"></div>
         </div>
       </div>
@@ -2108,7 +2108,7 @@ function completeOnboarding() {
 
 function skipOnboarding() {
   state.userName = 'Donnie';
-  state.address = 'My NGC Home';
+  state.address = '9715 Greystone Court';
   localStorage.setItem('ngc_name', state.userName);
   localStorage.setItem('ngc_address', state.address);
   applyUserData();
@@ -2862,7 +2862,7 @@ async function askAI(customMsg) {
   btn.textContent = '…';
   msgEl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
 
-  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Ventris Place home'}.
+  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || '9715 Greystone Court, Granite Bay CA 95746'}.
 
 Home status: Front door locked, back door locked, garage closed (MyQ connected), thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
 
