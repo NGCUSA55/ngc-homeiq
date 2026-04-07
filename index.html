@@ -529,6 +529,53 @@ html, body {
 }
 .chip:active { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.1); }
 
+/* ── Connect State Cards ── */
+.connect-card {
+  background: var(--card);
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex; align-items: center; gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+.connect-card:active { transform: scale(0.98); border-color: var(--accent); }
+.connect-card-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--border2);
+  display: grid; place-items: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.connect-card-text { flex: 1; }
+.connect-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.connect-card-sub { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.connect-card-cta {
+  background: var(--accent);
+  border-radius: 8px; padding: 7px 14px;
+  font-size: 12px; font-weight: 700; color: #fff;
+  white-space: nowrap; flex-shrink: 0;
+}
+.connect-card-cta.amber { background: linear-gradient(135deg, #b45309, #f59e0b); color: #000; }
+.connect-card-cta.green { background: var(--green); color: #000; }
+.demo-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 10px; font-weight: 700;
+  color: #f59e0b; letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.demo-banner {
+  background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.04));
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 12px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.demo-banner-text { font-size: 11px; color: rgba(245,158,11,0.8); flex: 1; line-height: 1.4; }
+
 /* Quick device tiles */
 .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tile {
