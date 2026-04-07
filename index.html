@@ -1361,92 +1361,163 @@ html, body {
     </div>
 
     <div class="section">
-      <!-- Spotify Status -->
-      <div id="spotify-status-bar" style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:16px">🟢</div>
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--spotify);text-transform:uppercase;letter-spacing:1px" id="spotify-status-label">Not Connected</div>
-            <div style="font-size:10px;color:var(--text3)" id="spotify-user-label">Tap Connect to get started</div>
+
+      <!-- Sonos Connect Banner (shown when not connected) -->
+      <div id="sonos-connect-banner">
+        <div style="background:linear-gradient(135deg,#0d1a2a,#0a1020);border:1px solid rgba(59,130,246,0.2);border-radius:18px;padding:24px;text-align:center;margin-bottom:16px">
+          <div style="font-size:40px;margin-bottom:12px">🔊</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:6px">Connect Sonos</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:20px;font-weight:300">Control every speaker in Bearstone — any music service, any room, all in sync</div>
+          <button onclick="sonosLogin()" style="background:linear-gradient(135deg,#1d4ed8,var(--accent));border:none;border-radius:12px;padding:14px 28px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;width:100%">🔊 Connect Sonos System</button>
+        </div>
+      </div>
+
+      <!-- Sonos Main Controls (shown when connected) -->
+      <div id="sonos-controls" style="display:none">
+
+        <!-- Now Playing Card -->
+        <div style="background:linear-gradient(135deg,#0d1525,#0a1020);border:1px solid rgba(59,130,246,0.2);border-radius:18px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)"></div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+            <div id="sonos-album-art" style="width:60px;height:60px;border-radius:12px;background:var(--border2);display:grid;place-items:center;font-size:28px;flex-shrink:0">🎵</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px" id="sonos-source-label">Sonos</div>
+              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sonos-track">Nothing playing</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sonos-artist">Choose a room and source below</div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div style="height:3px;background:var(--border);border-radius:2px;margin-bottom:14px">
+            <div id="sonos-prog" style="height:100%;width:35%;background:linear-gradient(90deg,var(--accent),#60a5fa);border-radius:2px;transition:width 1s linear"></div>
+          </div>
+          <!-- Controls -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:16px">
+            <div onclick="sonosAction('prev')" style="font-size:22px;cursor:pointer;opacity:0.7">⏮</div>
+            <div id="sonos-play-btn" onclick="sonosAction('playpause')" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,var(--accent));display:grid;place-items:center;font-size:22px;cursor:pointer;box-shadow:0 0 20px rgba(59,130,246,0.3)">▶</div>
+            <div onclick="sonosAction('next')" style="font-size:22px;cursor:pointer;opacity:0.7">⏭</div>
+          </div>
+          <!-- Volume -->
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:14px">🔈</span>
+            <input type="range" min="0" max="100" value="65" id="sonos-vol-slider"
+              oninput="sonosSetVolume(this.value)"
+              style="flex:1;height:4px;accent-color:var(--accent);cursor:pointer">
+            <span style="font-size:14px">🔊</span>
+            <span style="font-size:11px;color:var(--text2);width:28px;text-align:right" id="sonos-vol-label">65</span>
           </div>
         </div>
-        <div style="display:flex;gap:6px">
-          <button onclick="spotifyLogin()" id="spotify-reconnect-btn" style="display:none;background:#1db954;border:none;border-radius:8px;padding:4px 10px;color:#000;font-size:11px;font-weight:700;cursor:pointer">Reconnect</button>
-          <button onclick="spotifyLogout()" id="spotify-disconnect-btn" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text3);font-size:11px;cursor:pointer">Disconnect</button>
-        </div>
-      </div>
 
-      <!-- Spotify Connect Banner (shown when not connected) -->
-      <div id="spotify-connect-banner">
-        <div style="background:linear-gradient(135deg,#0d2218,#0a1a10);border:1px solid rgba(29,215,84,0.2);border-radius:18px;padding:24px;text-align:center;margin-bottom:16px">
-          <div style="font-size:40px;margin-bottom:12px">🎵</div>
-          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:6px">Connect Spotify</div>
-          <div style="font-size:13px;color:var(--text2);margin-bottom:20px;font-weight:300">Log in with your Spotify account to control music throughout your NGC home</div>
-          <button onclick="spotifyLogin()" style="background:#1db954;border:none;border-radius:12px;padding:14px 28px;color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;width:100%">▶ Connect with Spotify</button>
+        <!-- Rooms -->
+        <div class="sec-head">
+          <div class="sec-title">Rooms</div>
+          <div class="sec-action" id="sonos-group-toggle" onclick="toggleSonosGroupMode()">Group rooms</div>
         </div>
-      </div>
+        <div id="sonos-rooms-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <!-- Populated by JS -->
+        </div>
+        <div id="sonos-group-bar" style="display:none;background:var(--card2);border:1px solid var(--accent);border-radius:12px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:600">Group mode <span style="color:var(--accent)" id="sonos-group-count">0 rooms</span></div>
+          <button onclick="sonosGroupSelected()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Play in group →</button>
+        </div>
 
-      <!-- Now playing (shown when connected) -->
-      <div class="now-playing-card" id="now-playing-card" style="display:none">
-        <div class="np-album" id="np-album-art">🎵</div>
-        <div class="np-via"><span class="pill pill-green" id="np-via-label">▶ Spotify Connected</span></div>
-        <div class="np-track" id="npTrack">Nothing playing</div>
-        <div class="np-artist" id="npArtist">Pick a song or playlist below</div>
-        <div class="np-prog">
-          <div class="prog-track">
-            <div class="prog-fill" id="progFill" style="width:0%"></div>
+        <!-- Music Sources -->
+        <div class="sec-head">
+          <div class="sec-title">Music Sources</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div onclick="sonosOpenSource('spotify')" style="background:linear-gradient(135deg,#0d2218,#0a1a10);border:1px solid rgba(29,215,84,0.2);border-radius:14px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">🎵</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1db954">Spotify</div>
+              <div style="font-size:10px;color:var(--text3)">Stream via Sonos</div>
+            </div>
           </div>
-          <div class="prog-times">
-            <span id="progTime">0:00</span>
-            <span id="progDuration">0:00</span>
+          <div onclick="sonosOpenSource('apple')" style="background:linear-gradient(135deg,#1a0d1a,#120a12);border:1px solid rgba(250,68,130,0.2);border-radius:14px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">🍎</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#fa4482">Apple Music</div>
+              <div style="font-size:10px;color:var(--text3)">Stream via Sonos</div>
+            </div>
           </div>
-        </div>
-        <div class="np-controls">
-          <div class="np-ctrl" onclick="spotifyAction('shuffle')">⇄</div>
-          <div class="np-ctrl" onclick="spotifyAction('prev')">⏮</div>
-          <div class="np-play" id="npPlay" onclick="spotifyAction('playpause')">▶</div>
-          <div class="np-ctrl" onclick="spotifyAction('next')">⏭</div>
-          <div class="np-ctrl" onclick="spotifyAction('repeat')">⋯</div>
-        </div>
-        <div class="vol-row">
-          <div class="vol-icon">🔈</div>
-          <input class="vol-slider" type="range" min="0" max="100" value="65" oninput="spotifyVolume(this.value)" id="volSlider">
-          <div class="vol-icon">🔊</div>
-        </div>
-      </div>
-
-      <!-- Sonos Speakers -->
-      <div class="sec-head" style="margin-top:8px">
-        <div class="sec-title">Sonos Speakers</div>
-        <div class="sec-action" onclick="addSpeaker()">+ Add</div>
-      </div>
-      <div id="speakers-list">
-        <div onclick="addSpeaker()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:16px;cursor:pointer">
-          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">🔊</div>
-          <div>
-            <div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Sonos Speaker</div>
-            <div style="font-size:12px;color:var(--text2)">Connect your Sonos system to control rooms</div>
+          <div onclick="sonosOpenSource('amazon')" style="background:linear-gradient(135deg,#1a1200,#120d00);border:1px solid rgba(255,153,0,0.2);border-radius:14px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">📦</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#ff9900">Amazon Music</div>
+              <div style="font-size:10px;color:var(--text3)">Stream via Sonos</div>
+            </div>
+          </div>
+          <div onclick="sonosOpenSource('radio')" style="background:linear-gradient(135deg,#0d1a1a,#0a1212);border:1px solid rgba(6,182,212,0.2);border-radius:14px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">📻</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#06b6d4">Radio</div>
+              <div style="font-size:10px;color:var(--text3)">TuneIn via Sonos</div>
+            </div>
           </div>
         </div>
+
+        <!-- Scenes -->
+        <div class="sec-head">
+          <div class="sec-title">Scenes</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+          <div onclick="sonosScene('morning')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer">
+            <span style="font-size:22px">☀️</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">Morning</div>
+              <div style="font-size:11px;color:var(--text2)">Kitchen · Soft · Vol 30</div>
+            </div>
+            <span style="color:var(--text3)">▶</span>
+          </div>
+          <div onclick="sonosScene('evening')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer">
+            <span style="font-size:22px">🌙</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">Evening</div>
+              <div style="font-size:11px;color:var(--text2)">All rooms · Ambient · Vol 45</div>
+            </div>
+            <span style="color:var(--text3)">▶</span>
+          </div>
+          <div onclick="sonosScene('party')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer">
+            <span style="font-size:22px">🎉</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">Party</div>
+              <div style="font-size:11px;color:var(--text2)">All rooms grouped · Vol 70</div>
+            </div>
+            <span style="color:var(--text3)">▶</span>
+          </div>
+          <div onclick="sonosScene('off')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer">
+            <span style="font-size:22px">🔇</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">All Off</div>
+              <div style="font-size:11px;color:var(--text2)">Pause all speakers</div>
+            </div>
+            <span style="color:var(--text3)">▶</span>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Your Playlists -->
-      <div class="sec-head" style="margin-top:8px">
-        <div class="sec-title">🎵 Your Playlists</div>
-        <div class="sec-action" onclick="loadPlaylists()">Refresh</div>
-      </div>
-      <div id="playlists-list" style="display:flex;flex-direction:column;gap:8px">
-        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your playlists</div>
+      <!-- Spotify as secondary (always visible, shown below Sonos) -->
+      <div id="spotify-section" style="margin-top:16px">
+        <div class="sec-head">
+          <div class="sec-title">Spotify</div>
+          <div id="spotify-status-bar" style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px" id="spotify-status-label" class="">Not connected</span>
+            <button onclick="spotifyLogin()" id="spotify-reconnect-btn" style="display:none;background:#1db954;border:none;border-radius:6px;padding:3px 8px;color:#000;font-size:10px;font-weight:700;cursor:pointer">Connect</button>
+            <button onclick="spotifyLogout()" id="spotify-disconnect-btn" style="display:none;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text3);font-size:10px;cursor:pointer">Disconnect</button>
+          </div>
+        </div>
+        <!-- Spotify playlists -->
+        <div id="playlists-list" style="display:flex;flex-direction:column;gap:8px">
+          <div onclick="spotifyLogin()" style="background:linear-gradient(135deg,#0d2218,#0a1a10);border:1px solid rgba(29,215,84,0.15);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:20px">🎵</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#1db954">Connect Spotify</div>
+              <div style="font-size:11px;color:var(--text2)">Play your playlists through Sonos</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Liked Songs -->
-      <div class="sec-head" style="margin-top:8px">
-        <div class="sec-title">❤️ Liked Songs</div>
-        <div class="sec-action" onclick="loadLikedSongs()">Refresh</div>
-      </div>
-      <div id="liked-songs-list" style="display:flex;flex-direction:column;gap:8px">
-        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Connect Spotify to see your liked songs</div>
-      </div>
     </div>
     <div class="spacer"></div>
   </div>
@@ -2482,13 +2553,179 @@ function setArmMode(mode) {
 function addCamera() {
   alert('Camera setup: When Ring API access is approved, this will walk you through connecting your Ring cameras. For now the demo shows what the live view will look like.');
 }
+// ── Sonos Integration ──
+const SONOS_CLIENT_ID = 'c8921eac-9ba3-4600-9f20-7e89385a2158';
+const SONOS_REDIRECT = 'https://homeiq-donnie.vercel.app/';
+const SONOS_SCOPES = 'playback-control-all';
+
+let sonosToken = localStorage.getItem('sonos_token') || null;
+let sonosHouseholdId = localStorage.getItem('sonos_household') || null;
+let sonosGroups = []; // current groups from API
+let sonosGroupMode = false;
+let sonosSelectedRooms = new Set();
+let sonosPlaying = false;
+
+// Rooms for Bearstone (populated from Sonos API or defaults)
+const BEARSTONE_ROOMS = [
+  { id: 'living', name: 'Living Room', icon: '🛋️' },
+  { id: 'kitchen', name: 'Kitchen', icon: '🍳' },
+  { id: 'master', name: 'Master Bedroom', icon: '🛏️' },
+  { id: 'office', name: 'Office', icon: '💻' },
+  { id: 'outdoor', name: 'Patio', icon: '🌿' },
+];
+
+function sonosLogin() {
+  const authUrl = `https://api.sonos.com/login/v3/oauth?client_id=${SONOS_CLIENT_ID}&response_type=code&state=sonos_auth&scope=${encodeURIComponent(SONOS_SCOPES)}&redirect_uri=${encodeURIComponent(SONOS_REDIRECT)}`;
+  window.location.href = authUrl;
+}
+
+function sonosCheckToken() {
+  // Check URL for Sonos OAuth callback
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  if (code && state === 'sonos_auth') {
+    // Exchange code for token — requires backend in production
+    // For now store a demo mode flag
+    localStorage.setItem('sonos_connected', 'demo');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  const connected = localStorage.getItem('sonos_connected');
+  if (connected) initSonosUI();
+}
+
+function initSonosUI() {
+  const banner = document.getElementById('sonos-connect-banner');
+  const controls = document.getElementById('sonos-controls');
+  if (banner) banner.style.display = 'none';
+  if (controls) controls.style.display = 'block';
+  renderSonosRooms();
+}
+
+function renderSonosRooms() {
+  const list = document.getElementById('sonos-rooms-list');
+  if (!list) return;
+  list.innerHTML = BEARSTONE_ROOMS.map(room => `
+    <div id="sonos-room-${room.id}" onclick="sonosSelectRoom('${room.id}')" style="
+      background:var(--card);border:1px solid var(--border);border-radius:14px;
+      padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;
+      transition:all 0.2s;
+    ">
+      <span style="font-size:22px">${room.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${room.name}</div>
+        <div class="sonos-room-status-${room.id}" style="font-size:11px;color:var(--text3)">Tap to control</div>
+      </div>
+      <div class="sonos-room-check-${room.id}" style="display:none;width:24px;height:24px;border-radius:50%;background:var(--accent);display:none;place-items:center;font-size:12px">✔</div>
+      <div style="font-size:18px;color:var(--text3)">▶</div>
+    </div>
+  `).join('');
+}
+
+function sonosSelectRoom(roomId) {
+  if (sonosGroupMode) {
+    // Toggle room selection for grouping
+    if (sonosSelectedRooms.has(roomId)) {
+      sonosSelectedRooms.delete(roomId);
+    } else {
+      sonosSelectedRooms.add(roomId);
+    }
+    updateSonosGroupUI();
+    return;
+  }
+  // Single room control — update now playing header
+  const room = BEARSTONE_ROOMS.find(r => r.id === roomId);
+  if (!room) return;
+  document.getElementById('sonos-source-label').textContent = `${room.name} · Sonos`;
+  // Highlight selected room
+  BEARSTONE_ROOMS.forEach(r => {
+    const el = document.getElementById(`sonos-room-${r.id}`);
+    if (el) el.style.borderColor = r.id === roomId ? 'rgba(59,130,246,0.5)' : 'var(--border)';
+  });
+}
+
+function toggleSonosGroupMode() {
+  sonosGroupMode = !sonosGroupMode;
+  sonosSelectedRooms.clear();
+  const toggle = document.getElementById('sonos-group-toggle');
+  const bar = document.getElementById('sonos-group-bar');
+  if (toggle) toggle.textContent = sonosGroupMode ? 'Cancel' : 'Group rooms';
+  if (bar) bar.style.display = sonosGroupMode ? 'flex' : 'none';
+  updateSonosGroupUI();
+}
+
+function updateSonosGroupUI() {
+  const count = document.getElementById('sonos-group-count');
+  if (count) count.textContent = `${sonosSelectedRooms.size} room${sonosSelectedRooms.size !== 1 ? 's' : ''} selected`;
+  BEARSTONE_ROOMS.forEach(r => {
+    const el = document.getElementById(`sonos-room-${r.id}`);
+    if (el) el.style.borderColor = sonosSelectedRooms.has(r.id) ? 'rgba(59,130,246,0.6)' : 'var(--border)';
+  });
+}
+
+function sonosGroupSelected() {
+  if (sonosSelectedRooms.size < 2) { alert('Select at least 2 rooms to group.'); return; }
+  const names = [...sonosSelectedRooms].map(id => BEARSTONE_ROOMS.find(r => r.id === id)?.name).join(', ');
+  document.getElementById('sonos-source-label').textContent = `Group · ${names}`;
+  toggleSonosGroupMode();
+  // In production: POST to Sonos createGroup API
+}
+
+function sonosAction(action) {
+  const btn = document.getElementById('sonos-play-btn');
+  if (action === 'playpause') {
+    sonosPlaying = !sonosPlaying;
+    if (btn) btn.textContent = sonosPlaying ? '⏸' : '▶';
+    document.getElementById('sonos-track').textContent = sonosPlaying ? 'Now Playing' : 'Paused';
+    document.getElementById('sonos-artist').textContent = sonosPlaying ? 'Sonos · Bearstone' : 'Tap play to resume';
+  }
+  // In production: POST to Sonos playback API
+}
+
+function sonosSetVolume(val) {
+  const label = document.getElementById('sonos-vol-label');
+  if (label) label.textContent = val;
+  // In production: POST to Sonos groupVolume API
+}
+
+function sonosOpenSource(source) {
+  const urls = {
+    spotify: 'https://open.spotify.com',
+    apple: 'https://music.apple.com',
+    amazon: 'https://music.amazon.com',
+    radio: 'https://tunein.com'
+  };
+  window.open(urls[source] || 'https://www.sonos.com', '_blank');
+  // In production: use Sonos loadAudioClip or audioClip to set source
+}
+
+function sonosScene(scene) {
+  const scenes = {
+    morning: { rooms: ['kitchen'], vol: 30, track: 'Morning Vibes', artist: 'Sonos Radio' },
+    evening: { rooms: ['living','kitchen','master'], vol: 45, track: 'Evening Ambient', artist: 'Sonos Radio' },
+    party:   { rooms: ['living','kitchen','outdoor'], vol: 70, track: 'Party Mix', artist: 'Sonos Radio' },
+    off:     { rooms: [], vol: 0, track: 'All paused', artist: 'Tap play to resume' }
+  };
+  const s = scenes[scene];
+  if (!s) return;
+  if (scene === 'off') {
+    sonosPlaying = false;
+    document.getElementById('sonos-play-btn').textContent = '▶';
+  } else {
+    sonosPlaying = true;
+    document.getElementById('sonos-play-btn').textContent = '⏸';
+  }
+  document.getElementById('sonos-track').textContent = s.track;
+  document.getElementById('sonos-artist').textContent = s.artist;
+  document.getElementById('sonos-vol-slider').value = s.vol;
+  document.getElementById('sonos-vol-label').textContent = s.vol;
+  const rNames = s.rooms.map(id => BEARSTONE_ROOMS.find(r => r.id === id)?.name).filter(Boolean).join(', ');
+  document.getElementById('sonos-source-label').textContent = rNames || 'All rooms';
+  // In production: call Sonos group API + set volume + load content
+}
+
 function addSpeaker() {
-  const name = prompt('Speaker name (e.g. Living Room, Kitchen):');
-  if (!name) return;
-  const speakers = JSON.parse(localStorage.getItem('ngc_speakers') || '[]');
-  speakers.push(name);
-  localStorage.setItem('ngc_speakers', JSON.stringify(speakers));
-  renderSpeakers();
+  alert('Your Sonos speakers are managed through the Sonos app. Connect Sonos above to control them here.');
 }
 
 function renderSpeakers() {
@@ -2987,6 +3224,7 @@ function startApp() {
 
 // ── Init ──
 checkOnboarding();
+sonosCheckToken();
 updateClock(); // Always start clock even during onboarding
 </script>
 </body>
