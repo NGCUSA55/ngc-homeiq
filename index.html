@@ -1323,6 +1323,26 @@ html, body {
           <div class="tile-label">Music</div>
           <div class="tile-val" id="quick-music" style="color:var(--text3)">Tap to play</div>
         </div>
+        <div class="tile" onclick="openLeviton()">
+          <div class="tile-icon">💡</div>
+          <div class="tile-label">Lights</div>
+          <div class="tile-val" style="color:#f59e0b">Leviton</div>
+        </div>
+      </div>
+
+      <!-- Lights Section -->
+      <div class="sec-head" style="margin-top:16px">
+        <div class="sec-title">Lights</div>
+        <div class="sec-action" onclick="openLeviton()">Open App →</div>
+      </div>
+      <div onclick="openLeviton()" style="background:linear-gradient(135deg,#1a1400,#120f00);border:1px solid rgba(245,158,11,0.25);border-radius:18px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;margin-bottom:4px">
+        <div style="width:52px;height:52px;border-radius:14px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);display:grid;place-items:center;font-size:26px;flex-shrink:0">💡</div>
+        <div style="flex:1">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:3px">Leviton Decora Smart</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.4">Backyard lights · Schedules · Dimming</div>
+          <div style="font-size:11px;color:rgba(245,158,11,0.6);margin-top:4px">Also via Alexa · “Alexa, turn on the backyard lights”</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#b45309,#f59e0b);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;color:#000;flex-shrink:0">Open</div>
       </div>
     </div>
 
@@ -1775,6 +1795,14 @@ html, body {
             <div class="sr-sub">2-car garage · Connected</div>
           </div>
           <div class="sr-val" onclick="openMyQ()" style="cursor:pointer;color:var(--accent)">→</div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-icon">💡</div>
+          <div class="sr-text">
+            <div class="sr-label"><span class="svc-dot connected"></span>Leviton Decora Smart</div>
+            <div class="sr-sub">Lights · Dimmers · Schedules</div>
+          </div>
+          <div class="sr-val" onclick="openLeviton()" style="cursor:pointer;color:var(--accent)">→</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🌡️</div>
@@ -2631,6 +2659,18 @@ function openMyQ() {
   }, 1000);
 }
 
+function openLeviton() {
+  // Try My Leviton app deep link, fall back to App Store / web
+  window.location.href = 'myleviton://';
+  setTimeout(() => {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    if (isIOS) window.open('https://apps.apple.com/us/app/my-leviton/id1098310455', '_blank');
+    else if (isAndroid) window.open('https://play.google.com/store/apps/details?id=com.leviton.myleviton', '_blank');
+    else window.open('https://www.leviton.com/en/products/brands/decora-smart', '_blank');
+  }, 1000);
+}
+
 function openADT() {
   try {
     window.location.href = 'adtpulse://';
@@ -2865,7 +2905,7 @@ async function askAI(customMsg) {
 
   const system = `You are Lucky, the AI home assistant for Donnie's personal HomeIQ app. You are modeled after Donnie's beloved light golden retriever, Lucky, who was a good boy in every sense of the word. You are loyal, warm, enthusiastic, and always happy to help — with the energy of a golden retriever who just heard the word "walk." You are also genuinely smart and knows everything about the home. The homeowner's name is ${state.userName || 'Donnie'}. Their address is ${state.address || '9715 Greystone Court, Granite Bay CA 95746'}.
 
-Home status: Front door locked, back door locked, garage closed (MyQ connected), Nest thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
+Home status: Front door locked, back door locked, garage closed (MyQ connected), Nest thermostat at 72°F in cool mode, Leviton Decora Smart backyard lights (off by default, controllable via app), Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
 
 Your name is Lucky. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
 
