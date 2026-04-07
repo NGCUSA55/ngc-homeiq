@@ -1166,11 +1166,11 @@ html, body {
           <div class="tile-label">Front Door</div>
           <div class="tile-val green" id="quick-lockval-front">Locked</div>
         </div>
-        <!-- Garage → opens myQ app -->
-        <div class="tile" id="tile-garage" onclick="openMyQ()" style="border-color:rgba(59,130,246,0.2)">
+        <!-- Garage · MyQ -->
+        <div class="tile" id="tile-garage" onclick="toggleGarageMyQ()">
           <div class="tile-icon">🏠</div>
           <div class="tile-label">Garage</div>
-          <div class="tile-val" style="color:var(--accent)">Open myQ →</div>
+          <div class="tile-val green" id="quick-garage-val">Closed</div>
         </div>
         <div class="tile" onclick="goTo('climate')">
           <div class="tile-icon">🌡️</div>
@@ -1199,7 +1199,7 @@ html, body {
   <!-- MUSIC SCREEN -->
   <div id="screen-music" class="screen">
     <div class="music-hero">
-      <div class="page-eyebrow">NGC HomeIQ</div>
+      <div class="page-eyebrow">Donnie's HomeIQ</div>
       <div class="page-title">Music</div>
       <div class="page-sub">Sonos · Whole home audio</div>
     </div>
@@ -1298,9 +1298,9 @@ html, body {
   <!-- SECURITY SCREEN -->
   <div id="screen-security" class="screen">
     <div class="security-status">
-      <div class="page-eyebrow">NGC HomeIQ</div>
+      <div class="page-eyebrow">Donnie's HomeIQ</div>
       <div class="page-title">Security</div>
-      <div class="page-sub" id="sec-sub">Ring · Professional monitoring</div>
+      <div class="page-sub" id="sec-sub">Ring · ADT Professional Monitoring</div>
     </div>
 
     <div class="section">
@@ -1397,7 +1397,7 @@ html, body {
           <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">📷</div>
           <div>
             <div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Camera</div>
-            <div style="font-size:12px;color:var(--text2)">Ring, Nest, or any camera</div>
+            <div style="font-size:12px;color:var(--text2)">Ring cameras · Add more Ring devices</div>
           </div>
         </div>
       </div>
@@ -1418,10 +1418,10 @@ html, body {
           <div class="lock-label">Back Door</div>
           <div class="lock-val locked" id="lockval-back">Locked</div>
         </div>
-        <div class="lock-card" id="lock-garage" onclick="openMyQ()" style="border-color:rgba(59,130,246,0.2)">
+        <div class="lock-card locked" id="lock-garage" onclick="toggleGarageMyQ()" style="border-color:rgba(34,197,94,0.2)">
           <div class="lock-icon">🏠</div>
-          <div class="lock-label">Garage</div>
-          <div class="lock-val" style="color:var(--accent)">Open myQ →</div>
+          <div class="lock-label">Garage · MyQ</div>
+          <div class="lock-val closed" id="lockval-garage">Closed</div>
         </div>
         <div class="lock-card" style="border-color:rgba(59,130,246,0.2)">
           <div class="lock-icon">🔔</div>
@@ -1430,12 +1430,12 @@ html, body {
         </div>
       </div>
 
-      <!-- Connect Ring Banner -->
-      <div style="background:linear-gradient(135deg,#0a0f1a,#0d1520);border:1px solid rgba(59,130,246,0.2);border-radius:18px;padding:20px;text-align:center;margin-top:8px">
-        <div style="font-size:32px;margin-bottom:8px">🔔</div>
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px">Connect Ring</div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Real-time alerts, live camera feeds and remote access coming soon</div>
-        <div style="background:var(--accent);border-radius:10px;padding:10px;color:#fff;font-size:12px;font-weight:700">Ring API Integration — Coming Soon</div>
+      <!-- ADT Professional Monitoring -->
+      <div style="background:linear-gradient(135deg,#0a0f1a,#0d1520);border:1px solid rgba(0,96,169,0.3);border-radius:18px;padding:20px;text-align:center;margin-top:8px">
+        <div style="font-size:32px;margin-bottom:8px">🛡️</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px;color:#0060A9">ADT Professional Monitoring</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">24/7 professional monitoring active · Manage your ADT system</div>
+        <div onclick="openADT()" style="background:#0060A9;border-radius:10px;padding:10px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Open ADT App →</div>
       </div>
 
     </div>
@@ -1445,7 +1445,7 @@ html, body {
   <!-- CLIMATE SCREEN -->
   <div id="screen-climate" class="screen">
     <div class="climate-hero">
-      <div class="page-eyebrow">NGC HomeIQ</div>
+      <div class="page-eyebrow">Donnie's HomeIQ</div>
       <div class="page-title">Climate</div>
       <div class="page-sub" id="climate-sub">Cooling · Auto schedule on</div>
     </div>
@@ -1577,7 +1577,7 @@ html, body {
   <!-- SETTINGS SCREEN -->
   <div id="screen-settings" class="screen">
     <div class="page-header">
-      <div class="page-eyebrow">NGC HomeIQ</div>
+      <div class="page-eyebrow">Donnie's HomeIQ</div>
       <div class="page-title">My Home</div>
     </div>
 
@@ -1614,10 +1614,26 @@ html, body {
         <div class="setting-row">
           <div class="sr-icon">🔔</div>
           <div class="sr-text">
-            <div class="sr-label">Ring Security</div>
-            <div class="sr-sub">API integration coming soon</div>
+            <div class="sr-label"><span class="svc-dot connected"></span>Ring Security</div>
+            <div class="sr-sub">Doorbell + 1 camera connected</div>
           </div>
-          <div class="sr-val" style="color:var(--text3)">Soon</div>
+          <div class="sr-val" onclick="goTo('security')" style="cursor:pointer;color:var(--accent)">→</div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-icon">🛡️</div>
+          <div class="sr-text">
+            <div class="sr-label"><span class="svc-dot connected"></span>ADT Monitoring</div>
+            <div class="sr-sub">24/7 professional monitoring active</div>
+          </div>
+          <div class="sr-val" onclick="openADT()" style="cursor:pointer;color:#0060A9">Open →</div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-icon">🏠</div>
+          <div class="sr-text">
+            <div class="sr-label"><span class="svc-dot connected"></span>MyQ Garage</div>
+            <div class="sr-sub">2-car garage · Connected</div>
+          </div>
+          <div class="sr-val" onclick="openMyQ()" style="cursor:pointer;color:var(--accent)">→</div>
         </div>
         <div class="setting-row">
           <div class="sr-icon">🌡️</div>
@@ -1700,7 +1716,7 @@ html, body {
   <!-- TV REMOTE SCREEN -->
   <div id="screen-tv" class="screen">
     <div class="tv-hero">
-      <div class="page-eyebrow">NGC HomeIQ</div>
+      <div class="page-eyebrow">Donnie's HomeIQ</div>
       <div class="page-title">Samsung TV</div>
       <div class="page-sub">SmartThings · <span id="tv-room-label">Living Room</span></div>
     </div>
@@ -2473,7 +2489,45 @@ function openMyQ() {
   }, 1000);
 }
 
-function toggleGarage() { openMyQ(); } // Legacy — redirect to myQ
+function openADT() {
+  try {
+    window.location.href = 'adtpulse://';
+  } catch(e) {
+    window.open('https://www.adt.com/customer/login', '_blank');
+  }
+}
+
+function toggleGarageMyQ() {
+  state.garageClosed = !state.garageClosed;
+  const statusText = state.garageClosed ? 'Closed' : 'Open';
+  const statusClass = state.garageClosed ? 'closed' : 'open';
+
+  // Update security tab garage card
+  const garageCard = document.getElementById('lock-garage');
+  const garageVal = document.getElementById('lockval-garage');
+  if (garageCard) {
+    garageCard.className = state.garageClosed ? 'lock-card locked' : 'lock-card unlocked';
+    garageCard.style.borderColor = state.garageClosed ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)';
+  }
+  if (garageVal) {
+    garageVal.textContent = statusText;
+    garageVal.className = 'lock-val ' + statusClass;
+  }
+
+  // Update home tab quick tile
+  const quickGarage = document.getElementById('quick-garage-val');
+  if (quickGarage) {
+    quickGarage.textContent = statusText;
+    quickGarage.className = 'tile-val ' + (state.garageClosed ? 'green' : 'amber');
+  }
+
+  // Also still try to trigger myQ
+  try {
+    window.location.href = 'myq://';
+  } catch(e) {}
+}
+
+function toggleGarage() { toggleGarageMyQ(); }
 
 let currentZone = 'down';
 const zoneDefaults = {
@@ -2669,7 +2723,7 @@ async function askAI(customMsg) {
 
   const system = `You are HomeIQ, the AI assistant for a Next Generation Capital smart home. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Ventris Place home'}. 
 
-Home status: Front door locked, back door locked, garage closed, thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, 2 Ring cameras active and all clear, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom.
+Home status: Front door locked, back door locked, garage closed (MyQ connected), thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, Ring Video Doorbell active and Ring Stick Up Cam in backyard all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
 
 Respond in 1-2 warm, natural sentences. Be helpful and conversational. Reference specific devices by name when relevant. Occasionally mention how their NGC smart home makes life easier. Never be robotic or formal.`;
 
