@@ -1130,6 +1130,39 @@ html, body {
 
 <div class="ambient"></div>
 
+<!-- ══ BUYER WELCOME SCREEN (token invite flow) ══ -->
+<div id="buyer-welcome" style="display:none;position:fixed;inset:0;background:#060810;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+  <img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:48px;height:auto;filter:brightness(0) invert(1);opacity:0.7;margin-bottom:28px">
+  <div style="font-size:11px;color:rgba(245,158,11,0.7);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px">Welcome to your new home</div>
+  <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--text);text-align:center;line-height:1.2;margin-bottom:6px">Hi <span id="bw-name" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">there</span>!</div>
+  <div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:32px">Your Cotton Lane home is ready for you.</div>
+
+  <!-- Address card -->
+  <div style="width:100%;max-width:340px;background:var(--card);border:1px solid rgba(245,158,11,0.2);border-radius:18px;padding:20px;margin-bottom:24px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);display:grid;place-items:center;font-size:22px;flex-shrink:0">🏠</div>
+      <div>
+        <div style="font-size:10px;color:rgba(245,158,11,0.7);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:4px">Your Address</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700" id="bw-address">Loading...</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">The Courtyards at Cotton Lane · Lot <span id="bw-lot"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Adie preview -->
+  <div style="width:100%;max-width:340px;background:linear-gradient(135deg,#0d1218,#0a0e16);border:1px solid rgba(245,158,11,0.12);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:32px">
+    <img src="./adie.png" style="width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:center top;border:1.5px solid rgba(245,158,11,0.4)" alt="Adie">
+    <div>
+      <div style="font-size:10px;color:#f59e0b;font-weight:700;text-transform:uppercase;letter-spacing:1.5px">Your Home Assistant</div>
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-top:2px">Adie</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">I’ll help you get settled in — ask me anything.</div>
+    </div>
+  </div>
+
+  <button onclick="activateBuyerWelcome()" style="width:100%;max-width:340px;background:linear-gradient(135deg,#b45309,#f59e0b);border:none;border-radius:14px;padding:16px;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#000;cursor:pointer;letter-spacing:0.5px">Enter My Home →</button>
+  <div style="font-size:11px;color:var(--text3);margin-top:16px;text-align:center">NGC HomeIQ · The Courtyards at Cotton Lane</div>
+</div>
+
 <!-- ══ ONBOARDING ══ -->
 <div id="onboarding">
   <div class="ob-logo"><img src="https://nextgenerationcapital.us/wp-content/uploads/2016/02/NGC_logo2.png" alt="NGC" style="width:52px;height:auto;object-fit:contain;filter:brightness(0) invert(1)"></div>
@@ -2146,6 +2179,106 @@ function resetApp() {
   }
 }
 
+// ── Buyer Token Flow ──
+const SHEET_ID = '1wQt9Dl-y_v1dvNyljcv2LvRH-MMHI_pYQh4twBuX2Gc';
+const SHEET_NAME = 'Buyers';
+// Note: this uses a published-to-web CSV approach — no API key needed
+// The sheet must be published: File > Share > Publish to web > Buyers sheet > CSV
+const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+let buyerData = null; // holds data from token lookup
+
+async function checkInviteToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (!token) return false;
+
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    const csv = await res.text();
+    const rows = parseCSV(csv);
+    if (!rows.length) return false;
+    const headers = rows[0].map(h => h.trim().replace(/^"|"$/g, ''));
+    const tokenIdx = headers.indexOf('Token');
+    const nameIdx = headers.indexOf('First Name');
+    const lastIdx = headers.indexOf('Last Name');
+    const lotIdx = headers.indexOf('Lot');
+    const addrIdx = headers.indexOf('Address');
+    const cityIdx = headers.indexOf('City');
+    const stateIdx = headers.indexOf('State');
+    const zipIdx = headers.indexOf('Zip');
+    if (tokenIdx === -1) return false;
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i].map(c => c.trim().replace(/^"|"$/g, ''));
+      if (row[tokenIdx] === token) {
+        const firstName = row[nameIdx] || '';
+        const lastName = row[lastIdx] || '';
+        const lot = row[lotIdx] || '';
+        const address = row[addrIdx] || '';
+        const city = row[cityIdx] || 'Elk Grove';
+        const st = row[stateIdx] || 'CA';
+        const zip = row[zipIdx] || '95758';
+        const fullAddress = `${address}, ${city} ${st} ${zip}`;
+        buyerData = { firstName, lastName, lot, fullAddress, token };
+        showBuyerWelcome(buyerData);
+        return true;
+      }
+    }
+  } catch(e) {
+    console.log('Token lookup failed:', e);
+  }
+  return false;
+}
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const cols = [];
+    let inQuote = false, cur = '';
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === ',' && !inQuote) { cols.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+    cols.push(cur);
+    rows.push(cols);
+  }
+  return rows;
+}
+
+function showBuyerWelcome(data) {
+  const el = document.getElementById('buyer-welcome');
+  if (!el) return;
+  document.getElementById('bw-name').textContent = data.firstName || 'there';
+  document.getElementById('bw-address').textContent = data.fullAddress;
+  document.getElementById('bw-lot').textContent = data.lot;
+  el.style.display = 'flex';
+  // Hide splash once welcome is ready
+  const splash = document.getElementById('adie-splash');
+  if (splash) splash.style.display = 'none';
+}
+
+function activateBuyerWelcome() {
+  if (!buyerData) return;
+  state.userName = buyerData.firstName;
+  state.address = buyerData.fullAddress;
+  state.lotNumber = parseInt(buyerData.lot) || 0;
+  localStorage.setItem('ngc_name', state.userName);
+  localStorage.setItem('ngc_address', state.address);
+  localStorage.setItem('ngc_lot', state.lotNumber);
+  localStorage.setItem('ngc_token', buyerData.token);
+  applyUserData();
+  document.getElementById('buyer-welcome').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  // Clean up URL token
+  window.history.replaceState({}, '', window.location.pathname);
+  startApp();
+}
+
 // Check if returning user
 function checkOnboarding() {
   const savedName = localStorage.getItem('ngc_name');
@@ -2156,7 +2289,9 @@ function checkOnboarding() {
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     startApp();
+    return true;
   }
+  return false;
 }
 
 // ── Navigation ──
@@ -2910,9 +3045,16 @@ function quickAsk(msg) {
   askAI(msg);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const input = document.getElementById('aiInput');
   if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') askAI(); });
+
+  // ── Startup: token → returning user → onboarding ──
+  const hasToken = await checkInviteToken();
+  if (!hasToken) {
+    const isReturning = checkOnboarding();
+    // If neither token nor returning user, show onboarding (default state)
+  }
 
   // ── Adie Splash Sequence ──
   const splash = document.getElementById('adie-splash');
