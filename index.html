@@ -375,10 +375,69 @@ html, body {
 }
 .sp-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
 
+/* ── Adie Splash Screen ── */
+#adie-splash {
+  position: fixed; inset: 0;
+  background: #060810;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+#adie-splash.fade-out {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+.adie-splash-portrait {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid rgba(245,158,11,0.3);
+  box-shadow: 0 0 60px rgba(245,158,11,0.2), 0 0 120px rgba(245,158,11,0.08);
+  animation: adie-glow 3s ease-in-out infinite;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+}
+.adie-splash-portrait.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+@keyframes adie-glow {
+  0%, 100% { box-shadow: 0 0 40px rgba(245,158,11,0.2), 0 0 80px rgba(245,158,11,0.06); }
+  50% { box-shadow: 0 0 70px rgba(245,158,11,0.35), 0 0 140px rgba(245,158,11,0.12); }
+}
+.adie-splash-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px; font-weight: 800;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24, #fcd34d);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 28px; letter-spacing: 4px;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.7s ease 0.6s, transform 0.7s ease 0.6s;
+}
+.adie-splash-name.visible { opacity: 1; transform: translateY(0); }
+.adie-splash-sub {
+  font-size: 12px; color: rgba(245,158,11,0.5);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-top: 8px; font-weight: 400;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.9s;
+}
+.adie-splash-sub.visible { opacity: 1; }
+.adie-splash-ngc {
+  position: absolute; bottom: 48px;
+  font-size: 11px; color: rgba(255,255,255,0.2);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+
 /* AI Assistant Card */
 .ai-card {
-  background: linear-gradient(135deg, #0d1420 0%, #0a1018 100%);
-  border: 1px solid var(--border2);
+  background: linear-gradient(135deg, #0d1218 0%, #0a0e16 100%);
+  border: 1px solid rgba(245,158,11,0.15);
   border-radius: var(--radius);
   padding: 18px;
   position: relative; overflow: hidden;
@@ -387,33 +446,57 @@ html, body {
 .ai-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.6;
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,0.6), transparent);
+}
+.ai-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at top right, rgba(245,158,11,0.04), transparent 60%);
+  pointer-events: none;
 }
 .ai-top {
   display: flex; align-items: center;
-  gap: 12px; margin-bottom: 14px;
+  gap: 14px; margin-bottom: 14px;
 }
-.ai-orb {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: linear-gradient(135deg, #1d4ed8, var(--accent), #06b6d4);
-  display: grid; place-items: center;
-  font-size: 18px; flex-shrink: 0;
-  animation: pulse 3s ease infinite;
-  box-shadow: 0 0 20px rgba(59,130,246,0.3);
+.ai-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  object-fit: cover; object-position: center top;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(245,158,11,0.4);
+  box-shadow: 0 0 20px rgba(245,158,11,0.2);
+  animation: adie-card-glow 4s ease-in-out infinite;
 }
-.ai-label { font-size: 10px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
-.ai-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-top: 1px; }
+@keyframes adie-card-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(245,158,11,0.15); }
+  50% { box-shadow: 0 0 28px rgba(245,158,11,0.35); }
+}
+.ai-avatar-wrap {
+  position: relative; flex-shrink: 0;
+}
+.ai-avatar-ring {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,158,11,0.2);
+  animation: adie-ring-spin 8s linear infinite;
+}
+@keyframes adie-ring-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.ai-label { font-size: 10px; color: #f59e0b; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+.ai-name { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-top: 2px; letter-spacing: 1px; }
 .ai-msg {
-  font-size: 13px; color: #7a9ab8;
-  line-height: 1.65; min-height: 48px;
+  font-size: 13px; color: #8a9ab8;
+  line-height: 1.7; min-height: 48px;
   margin-bottom: 14px; font-weight: 300;
+  padding-left: 2px;
 }
+.ai-msg .adie-highlight { color: #fbbf24; font-weight: 500; }
 .ai-input-row { display: flex; gap: 8px; }
 .ai-input {
   flex: 1;
   background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(245,158,11,0.12);
   border-radius: 10px;
   padding: 11px 14px;
   color: var(--text);
@@ -422,13 +505,13 @@ html, body {
   transition: border-color 0.2s;
 }
 .ai-input::placeholder { color: var(--text3); }
-.ai-input:focus { border-color: rgba(59,130,246,0.4); }
+.ai-input:focus { border-color: rgba(245,158,11,0.35); }
 .ai-send {
   width: 42px; height: 42px;
-  background: linear-gradient(135deg, #1d4ed8, var(--accent));
+  background: linear-gradient(135deg, #b45309, #f59e0b);
   border: none; border-radius: 10px;
   display: grid; place-items: center;
-  cursor: pointer; color: white;
+  cursor: pointer; color: #000;
   font-size: 18px; font-weight: bold;
   transition: transform 0.15s, opacity 0.2s;
   flex-shrink: 0;
@@ -437,14 +520,14 @@ html, body {
 .ai-send.loading { opacity: 0.5; pointer-events: none; }
 .quick-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .chip {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
+  background: rgba(245,158,11,0.05);
+  border: 1px solid rgba(245,158,11,0.12);
   border-radius: 20px; padding: 5px 12px;
-  font-size: 11px; color: var(--text3);
+  font-size: 11px; color: rgba(245,158,11,0.6);
   cursor: pointer; transition: all 0.2s;
   white-space: nowrap; font-weight: 500;
 }
-.chip:active { border-color: var(--accent); color: var(--accent); }
+.chip:active { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.1); }
 
 /* Quick device tiles */
 .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1037,6 +1120,14 @@ html, body {
 </head>
 <body>
 
+<!-- ══ ADIE SPLASH SCREEN ══ -->
+<div id="adie-splash">
+  <img class="adie-splash-portrait" id="adieSplashImg" src="./adie.png" alt="Adie" />
+  <div class="adie-splash-name" id="adieSplashName">ADIE</div>
+  <div class="adie-splash-sub" id="adieSplashSub">Your Home Assistant</div>
+  <div class="adie-splash-ngc">NGC HomeIQ · Next Generation Capital</div>
+</div>
+
 <div class="ambient"></div>
 
 <!-- ══ ONBOARDING ══ -->
@@ -1058,8 +1149,8 @@ html, body {
       <div class="ob-step-text"><strong>Security at a glance</strong>Locks, garage, and cameras all in one place.</div>
     </div>
     <div class="ob-step">
-      <div class="ob-step-icon">🤖</div>
-      <div class="ob-step-text"><strong>AI that knows your home</strong>Ask HomeIQ anything — it controls everything.</div>
+      <div class="ob-step-icon"><img src="./adie.png" alt="Adie" style="width:32px;height:32px;border-radius:50%;object-fit:cover;object-position:center top;border:1px solid rgba(245,158,11,0.4)"></div>
+      <div class="ob-step-text"><strong>Meet Adie, your AI assistant</strong>Ask her anything about your home — she knows everything.</div>
     </div>
   </div>
   <button class="ob-btn" onclick="completeOnboarding()">Set Up My Home →</button>
@@ -1105,18 +1196,21 @@ html, body {
     </div>
 
     <div class="section">
-      <!-- AI Card -->
+      <!-- Adie AI Card -->
       <div class="ai-card">
         <div class="ai-top">
-          <div class="ai-orb">🤖</div>
+          <div class="ai-avatar-wrap">
+            <img class="ai-avatar" src="./adie.png" alt="Adie" />
+            <div class="ai-avatar-ring"></div>
+          </div>
           <div>
-            <div class="ai-label">HomeIQ Assistant</div>
-            <div class="ai-name">Ask your home anything</div>
+            <div class="ai-label">Your Home Assistant</div>
+            <div class="ai-name">Adie</div>
           </div>
         </div>
-        <div class="ai-msg" id="aiMsg">Hey <span id="aiName">Donnie</span>! Everything looks great. Doors are locked, garage is closed. Your Sonos is playing in the living room — want me to extend it to the bedroom?</div>
+        <div class="ai-msg" id="aiMsg">Hey <span id="aiName" class="adie-highlight">Donnie</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?</div>
         <div class="ai-input-row">
-          <input class="ai-input" id="aiInput" placeholder="Ask HomeIQ anything…" type="text" />
+          <input class="ai-input" id="aiInput" placeholder="Ask Adie anything…" type="text" />
           <button class="ai-send" id="aiSend" onclick="askAI()">→</button>
         </div>
         <div class="quick-chips">
@@ -1985,7 +2079,7 @@ function applyUserData() {
   if (document.getElementById('profileName')) document.getElementById('profileName').textContent = name + "'s Home";
   if (document.getElementById('profileAddress')) document.getElementById('profileAddress').textContent = state.address;
   const aiMsg = document.getElementById('aiMsg');
-  if (aiMsg) aiMsg.innerHTML = `Hey ${sanitize(name)}! Everything looks great. Doors are locked, garage is closed. Your Sonos is playing in the living room — want me to extend it to the bedroom?`;
+  if (aiMsg) aiMsg.innerHTML = `Hey <span class="adie-highlight">${sanitize(name)}</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?`;
 }
 
 function resetApp() {
@@ -2721,11 +2815,11 @@ async function askAI(customMsg) {
   btn.textContent = '…';
   msgEl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
 
-  const system = `You are HomeIQ, the AI assistant for a Next Generation Capital smart home. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Ventris Place home'}. 
+  const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a Ventris Place home'}.
 
-Home status: Front door locked, back door locked, garage closed (MyQ connected), thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, Ring Video Doorbell active and Ring Stick Up Cam in backyard all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
+Home status: Front door locked, back door locked, garage closed (MyQ connected), thermostat at 72°F in cool mode, living room lights on at 80%, bedroom lights off, Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
 
-Respond in 1-2 warm, natural sentences. Be helpful and conversational. Reference specific devices by name when relevant. Occasionally mention how their NGC smart home makes life easier. Never be robotic or formal.`;
+Your name is Adie. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -2762,6 +2856,29 @@ function quickAsk(msg) {
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('aiInput');
   if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') askAI(); });
+
+  // ── Adie Splash Sequence ──
+  const splash = document.getElementById('adie-splash');
+  const splashImg = document.getElementById('adieSplashImg');
+  const splashName = document.getElementById('adieSplashName');
+  const splashSub = document.getElementById('adieSplashSub');
+
+  if (splash) {
+    // Trigger entrance animations
+    setTimeout(() => {
+      if (splashImg) splashImg.classList.add('visible');
+      if (splashName) splashName.classList.add('visible');
+      if (splashSub) splashSub.classList.add('visible');
+    }, 100);
+
+    // Fade out and remove splash after 2.8s
+    setTimeout(() => {
+      splash.classList.add('fade-out');
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 900);
+    }, 2800);
+  }
 });
 
 // ── Start App ──
