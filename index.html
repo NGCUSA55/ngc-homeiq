@@ -2559,31 +2559,107 @@ function spotifyLogout() {
 }
 
 // ── Security ──
-function setArmMode(mode) {
-  const configs = {
-    disarmed: { label:'Disarmed', sub:'Tap to arm your home', icon:'🔓', color:'var(--green)', btn:'arm-btn-disarmed' },
-    home:     { label:'Armed — Home', sub:'Motion alerts on · Interior off', icon:'🏠', color:'var(--amber)', btn:'arm-btn-home' },
-    away:     { label:'Armed — Away', sub:'All sensors active · Monitoring on', icon:'🚗', color:'var(--red)', btn:'arm-btn-away' },
-  };
-  const c = configs[mode];
+const ARM_CONFIGS = {
+  disarmed: { label:'Disarmed', sub:'Tap to arm your home', icon:'🔓', color:'var(--green)', btn:'arm-btn-disarmed', alexa:'DISARMED' },
+  home:     { label:'Armed — Home', sub:'Motion alerts on · Interior sensors off', icon:'🏠', color:'var(--amber)', btn:'arm-btn-home', alexa:'ARMED_STAY' },
+  away:     { label:'Armed — Away', sub:'All sensors active · ADT monitoring on', icon:'🚗', color:'var(--red)', btn:'arm-btn-away', alexa:'ARMED_AWAY' },
+};
+
+async function setArmMode(mode) {
+  const c = ARM_CONFIGS[mode];
   if (!c) return;
+  // Update UI immediately
+  updateArmUI(mode, c);
+  localStorage.setItem('ngc_arm_mode', mode);
+  localStorage.setItem('ngc_arm_time', new Date().toISOString());
+  // Update Home tab badge
+  updateSecurityBadge(mode, c);
+  // Send to Alexa if connected
+  if (amazonToken && window._adtEndpointId) {
+    try {
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_command&token=${encodeURIComponent(amazonToken)}&endpoint_id=${encodeURIComponent(window._adtEndpointId)}&namespace=Alexa.SecurityPanelController&name=Arm&payload=${encodeURIComponent(JSON.stringify({ armState: c.alexa }))}`);
+      const data = await res.json();
+      console.log('ADT arm response:', data);
+      if (!data.error) {
+        document.getElementById('arm-status-sub').textContent = c.sub + ' · Sent to ADT';
+      }
+    } catch(e) {
+      console.log('ADT command error:', e);
+    }
+  } else if (amazonToken && !window._adtEndpointId) {
+    // No ADT endpoint found — show Alexa voice command
+    const voiceCmd = mode === 'disarmed' ? 'Alexa, disarm ADT' : mode === 'home' ? 'Alexa, arm ADT stay' : 'Alexa, arm ADT away';
+    document.getElementById('arm-status-sub').textContent = `Say: "${voiceCmd}"`;
+  }
+}
+
+function updateArmUI(mode, c) {
   document.getElementById('arm-status-label').textContent = c.label;
   document.getElementById('arm-status-label').style.color = c.color;
   document.getElementById('arm-status-sub').textContent = c.sub;
   document.getElementById('arm-icon').textContent = c.icon;
-  // Reset all buttons
   ['disarmed','home','away'].forEach(m => {
     const btn = document.getElementById('arm-btn-' + m);
-    btn.style.background = 'var(--border2)';
-    btn.style.borderColor = 'var(--border)';
-    btn.style.color = 'var(--text2)';
+    if (btn) { btn.style.background = 'var(--border2)'; btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text2)'; }
   });
-  // Highlight active
   const active = document.getElementById(c.btn);
-  active.style.background = 'var(--card2)';
-  active.style.borderColor = c.color;
-  active.style.color = c.color;
-  localStorage.setItem('ngc_arm_mode', mode);
+  if (active) { active.style.background = 'var(--card2)'; active.style.borderColor = c.color; active.style.color = c.color; }
+}
+
+function updateSecurityBadge(mode, c) {
+  // Update Home tab security badge
+  let badge = document.getElementById('home-security-badge');
+  if (!badge) {
+    // Create badge next to security tile if it doesn't exist
+    const secTile = document.querySelector('[onclick*="screen-security"]') || document.querySelector('[onclick*=\'security\']');
+    if (secTile) {
+      badge = document.createElement('div');
+      badge.id = 'home-security-badge';
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;letter-spacing:0.5px';
+      secTile.style.position = 'relative';
+      secTile.appendChild(badge);
+    }
+  }
+  if (badge) {
+    const colors = { disarmed: '#22c55e', home: '#f59e0b', away: '#ef4444' };
+    badge.textContent = mode === 'disarmed' ? 'OFF' : mode === 'home' ? 'HOME' : 'AWAY';
+    badge.style.background = colors[mode];
+    badge.style.color = '#000';
+  }
+}
+
+async function queryADTState() {
+  if (!amazonToken || !window._adtEndpointId) return;
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_command&token=${encodeURIComponent(amazonToken)}&endpoint_id=${encodeURIComponent(window._adtEndpointId)}&namespace=Alexa&name=ReportState&payload={}`);
+    const data = await res.json();
+    if (data.context && data.context.properties) {
+      const armProp = data.context.properties.find(p => p.name === 'armState');
+      if (armProp) {
+        const stateMap = { 'DISARMED': 'disarmed', 'ARMED_STAY': 'home', 'ARMED_AWAY': 'away' };
+        const mode = stateMap[armProp.value] || 'disarmed';
+        updateArmUI(mode, ARM_CONFIGS[mode]);
+        updateSecurityBadge(mode, ARM_CONFIGS[mode]);
+        localStorage.setItem('ngc_arm_mode', mode);
+        // Show last updated time
+        const sub = document.getElementById('arm-status-sub');
+        if (sub) sub.textContent = ARM_CONFIGS[mode].sub + ' · Live from ADT';
+      }
+    }
+  } catch(e) {
+    console.log('ADT state query error:', e);
+    // Fall back to last saved state
+    const savedMode = localStorage.getItem('ngc_arm_mode') || 'disarmed';
+    const savedTime = localStorage.getItem('ngc_arm_time');
+    const c = ARM_CONFIGS[savedMode];
+    updateArmUI(savedMode, c);
+    updateSecurityBadge(savedMode, c);
+    if (savedTime) {
+      const ago = Math.round((Date.now() - new Date(savedTime)) / 60000);
+      const sub = document.getElementById('arm-status-sub');
+      if (sub && ago < 1440) sub.textContent = c.sub + ` · Set ${ago < 1 ? 'just now' : ago + 'm ago'}`;
+    }
+  }
 }
 
 function addCamera() {
@@ -3443,6 +3519,7 @@ function mapAlexaDevicesToUI(endpoints) {
     } else if (cats.includes('SECURITY_PANEL') || name.toLowerCase().includes('adt') || 
                name.toLowerCase().includes('alarm')) {
       securityPanels.push({ id, name });
+      window._adtEndpointId = id; // Store for arm/disarm commands
     } else if (cats.includes('GARAGE_DOOR') || name.toLowerCase().includes('garage') ||
                name.toLowerCase().includes('myq') || name.toLowerCase().includes('liftmaster')) {
       garages.push({ id, name });
@@ -3681,7 +3758,19 @@ checkAmazonCallback();
 updateAmazonUI();
 checkOnboarding();
 sonosCheckToken();
-updateClock(); // Always start clock even during onboarding
+updateClock();
+// Restore last known arm state on load
+const _savedMode = localStorage.getItem('ngc_arm_mode') || 'disarmed';
+const _savedTime = localStorage.getItem('ngc_arm_time');
+updateArmUI(_savedMode, ARM_CONFIGS[_savedMode]);
+updateSecurityBadge(_savedMode, ARM_CONFIGS[_savedMode]);
+if (_savedTime) {
+  const _ago = Math.round((Date.now() - new Date(_savedTime)) / 60000);
+  const _sub = document.getElementById('arm-status-sub');
+  if (_sub && _ago < 1440) _sub.textContent = ARM_CONFIGS[_savedMode].sub + ` · Set ${_ago < 1 ? 'just now' : _ago + 'm ago'}`;
+}
+// Query live ADT state if Amazon connected
+if (amazonToken) setTimeout(queryADTState, 3000); // Always start clock even during onboarding
 </script>
 </body>
 </html>
