@@ -1286,6 +1286,7 @@ html, body {
         <div id="voice-status" style="display:none;font-size:11px;color:rgba(245,158,11,0.7);text-align:center;margin-top:6px;letter-spacing:0.5px">🎤 Listening… speak now</div>
         <div class="quick-chips">
           <div class="chip" onclick="toggleVoice()">🎤 Speak</div>
+          <div class="chip" onclick="toggleLuckyVoice()" id="voice-toggle-btn">🔊 Lucky’s voice: On</div>
           <div class="chip" onclick="quickAsk('Good night mode — close garage and arm cameras')">🌙 Night mode</div>
           <div class="chip" onclick="quickAsk('Play something relaxing in the living room')">🎵 Relax</div>
           <div class="chip" onclick="quickAsk('Is the garage closed?')">🏠 Garage</div>
@@ -3172,13 +3173,59 @@ Your name is Lucky. You also accept voice commands — the homeowner may speak n
       })
     });
     const data = await res.json();
-    msgEl.textContent = data.content?.[0]?.text || "I'm having a moment — try again!";
+    const reply = data.content?.[0]?.text || "I'm having a moment — try again!";
+    msgEl.textContent = reply;
+    speakResponse(reply);
   } catch(e) {
-    msgEl.textContent = "HomeIQ AI needs a backend connection. This will work once Supabase is set up.";
+    msgEl.textContent = "Woof! I lost my connection for a second — try again!";
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '→';
   }
+}
+
+// ── Lucky's Voice (ElevenLabs) ──
+const ELEVENLABS_KEY_LUCKY = 'sk_f0a99748be1c03491fd2487b17e9d9fcb2fc77e394e54f06';
+const LUCKY_VOICE_ID = 'bIHbv24MWmeRgasZH58o'; // Will — Relaxed Optimist
+let currentAudio = null;
+let voiceEnabled = localStorage.getItem('lucky_voice') !== 'off';
+
+async function speakResponse(text) {
+  if (!voiceEnabled) return;
+  // Strip any HTML tags from text
+  const clean = text.replace(/<[^>]*>/g, '').trim();
+  if (!clean) return;
+  // Stop any currently playing audio
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${LUCKY_VOICE_ID}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': ELEVENLABS_KEY_LUCKY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: clean,
+        model_id: 'eleven_turbo_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+      })
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.play();
+    currentAudio.onended = () => URL.revokeObjectURL(url);
+  } catch(e) {
+    console.log('Voice error:', e);
+  }
+}
+
+function toggleLuckyVoice() {
+  voiceEnabled = !voiceEnabled;
+  localStorage.setItem('lucky_voice', voiceEnabled ? 'on' : 'off');
+  const btn = document.getElementById('voice-toggle-btn');
+  if (btn) btn.textContent = voiceEnabled ? '🔊 Lucky’s voice: On' : '🔇 Lucky’s voice: Off';
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
 }
 
 function quickAsk(msg) {
