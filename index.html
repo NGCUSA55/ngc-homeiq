@@ -1590,11 +1590,6 @@ html, body {
           <div class="lock-label">Front Door</div>
           <div class="lock-val locked" id="lockval-front">Locked</div>
         </div>
-        <div class="lock-card locked" id="lock-back" onclick="toggleLock('back')">
-          <div class="lock-icon">🔒</div>
-          <div class="lock-label">Back Door</div>
-          <div class="lock-val locked" id="lockval-back">Locked</div>
-        </div>
         <div class="lock-card locked" id="lock-garage" onclick="toggleGarageMyQ()" style="border-color:rgba(34,197,94,0.2)">
           <div class="lock-icon">🏠</div>
           <div class="lock-label">Garage Door</div>
@@ -2207,7 +2202,7 @@ function applyUserData() {
   if (document.getElementById('profileName')) document.getElementById('profileName').textContent = name + "'s Home";
   if (document.getElementById('profileAddress')) document.getElementById('profileAddress').textContent = state.address;
   const aiMsg = document.getElementById('aiMsg');
-  if (aiMsg) aiMsg.innerHTML = `Hey <span class="adie-highlight">${sanitize(name)}</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?`;
+  if (aiMsg) aiMsg.innerHTML = `Hey <span class="adie-highlight">${sanitize(name)}</span>! Welcome home — your front door is locked and garage is closed. What can I help you with?`;
 }
 
 function resetApp() {
