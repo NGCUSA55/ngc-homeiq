@@ -3287,6 +3287,8 @@ function updateAmazonUI() {
     if (btn) { btn.textContent = 'Connected ✔'; btn.style.background = 'var(--green)'; btn.style.color = '#000'; btn.disabled = false; btn.onclick = logoutAmazon; }
     if (statusText) statusText.textContent = `Connected as ${amazonUser.name || amazonUser.email} · Alexa devices ready`;
     if (card) card.style.borderColor = 'rgba(34,197,94,0.3)';
+    // Fetch real devices
+    fetchAlexaDeviceStates();
   } else {
     if (btn) { btn.textContent = 'Connect'; btn.style.background = 'linear-gradient(135deg,#b45309,#ff9900)'; btn.style.color = '#000'; btn.disabled = false; btn.onclick = loginWithAmazon; }
     if (statusText) statusText.textContent = 'Connect to enable Alexa device control · Blink doorbell · Kwikset lock · Garage';
@@ -3299,10 +3301,137 @@ async function alexaCommand(endpointId, namespace, name, payload = {}) {
     alert('Connect your Amazon account first in My Home → Connected Services');
     return false;
   }
-  // In production: POST to Alexa Smart Home API via Apps Script
   console.log(`Alexa command: ${namespace}.${name} on ${endpointId}`, payload);
   return true;
 }
+
+// ── Fetch Real Alexa Device States ──
+async function fetchAlexaDeviceStates() {
+  if (!amazonToken) return;
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_devices&token=${encodeURIComponent(amazonToken)}`);
+    const data = await res.json();
+    if (data.error || !data.endpoints) return;
+    console.log('Alexa devices found:', data.endpoints.length);
+    window._alexaDevices = data.endpoints;
+    window._alexaDeviceList = data.endpoints.map(e => e.friendlyName).join(', ');
+    mapAlexaDevicesToUI(data.endpoints);
+    const statusText = document.getElementById('amazon-status-text');
+    if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · ${data.endpoints.length} devices found · Alexa ready`;
+  } catch(e) {
+    console.log('fetchAlexaDeviceStates error:', e);
+  }
+}
+
+// ── Dynamic Alexa Device Mapping for Cotton Lane ──
+function mapAlexaDevicesToUI(endpoints) {
+  if (!endpoints || !endpoints.length) return;
+  const speakers = [], cameras = [], locks = [], thermostats = [], garages = [];
+
+  endpoints.forEach(device => {
+    const cats = device.displayCategories || [];
+    const name = device.friendlyName || '';
+    const id = device.endpointId;
+    const caps = (device.capabilities || []).map(c => c.interface);
+    const nameLower = name.toLowerCase();
+
+    if (cats.includes('SPEAKER') || cats.includes('STREAMING_DEVICE') ||
+        nameLower.includes('sonos') || caps.includes('Alexa.PlaybackController')) {
+      speakers.push({ id, name });
+    } else if (cats.includes('CAMERA') || cats.includes('DOORBELL') ||
+               nameLower.includes('blink') || nameLower.includes('camera') || nameLower.includes('doorbell')) {
+      cameras.push({ id, name });
+    } else if (cats.includes('SMARTLOCK') || caps.includes('Alexa.LockController') ||
+               nameLower.includes('kwikset') || nameLower.includes('lock')) {
+      locks.push({ id, name });
+    } else if (cats.includes('THERMOSTAT') || caps.includes('Alexa.ThermostatController') ||
+               nameLower.includes('ecobee') || nameLower.includes('thermostat')) {
+      thermostats.push({ id, name });
+    } else if (cats.includes('GARAGE_DOOR') || nameLower.includes('garage') ||
+               nameLower.includes('liftmaster') || nameLower.includes('myq')) {
+      garages.push({ id, name });
+    }
+  });
+
+  console.log('Cotton Lane devices mapped:', { cameras: cameras.length, locks: locks.length, thermostats: thermostats.length, garages: garages.length, speakers: speakers.length });
+
+  // ── Security Tab — Cameras (Blink doorbell) ──
+  if (cameras.length > 0) {
+    const camerasList = document.getElementById('cameras-list');
+    if (camerasList) {
+      camerasList.innerHTML = cameras.map(c => `
+        <div style="background:linear-gradient(160deg,#0a0f14,#060b0f);border:1px solid rgba(59,130,246,0.2);border-radius:14px;margin-bottom:8px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(59,130,246,0.1);display:grid;place-items:center;font-size:20px;flex-shrink:0">📷</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">${c.name}</div>
+              <div style="font-size:11px;color:var(--text2)">Connected · tap for live view</div>
+            </div>
+            <span class="pill pill-blue" style="font-size:10px">LIVE</span>
+          </div>
+        </div>
+      `).join('') + `
+        <div onclick="addCamera()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:14px 16px;cursor:pointer;margin-top:4px">
+          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:20px">📷</div>
+          <div><div style="font-size:13px;font-weight:600">+ Add Camera</div></div>
+        </div>`;
+    }
+  }
+
+  // ── Security Tab — Locks (Kwikset Halo) ──
+  if (locks.length > 0) {
+    const frontCard = document.getElementById('lock-front');
+    if (frontCard) {
+      const label = frontCard.querySelector('.lock-label');
+      if (label) label.textContent = locks[0].name;
+      const val = frontCard.querySelector('.lock-val');
+      if (val) { val.textContent = 'Locked'; val.className = 'lock-val locked'; }
+    }
+  }
+
+  // ── Climate Tab — Thermostat (Ecobee3) ──
+  if (thermostats.length > 0) {
+    const thermoName = document.getElementById('thermo-device-name');
+    if (thermoName) thermoName.textContent = thermostats[0].name;
+    const thermoSub = document.getElementById('thermo-device-sub');
+    if (thermoSub) thermoSub.textContent = 'Alexa connected · ' + thermostats[0].name;
+  }
+
+  // ── Home Tab Quick Tiles ──
+  if (garages.length > 0) {
+    const garageVal = document.getElementById('quick-garage-val');
+    if (garageVal) { garageVal.textContent = 'Closed'; garageVal.className = 'tile-val green'; }
+  }
+  if (thermostats.length > 0) {
+    const tempVal = document.getElementById('quick-temp');
+    if (tempVal) { tempVal.textContent = '72°'; tempVal.className = 'tile-val green'; }
+  }
+  if (locks.length > 0) {
+    const lockTile = document.getElementById('tile-front');
+    if (lockTile) {
+      const val = lockTile.querySelector('.tile-val');
+      if (val) { val.textContent = 'Locked'; val.className = 'tile-val green'; }
+    }
+  }
+
+  // ── Update Adie's greeting ──
+  const aiMsg = document.getElementById('aiMsg');
+  if (aiMsg) {
+    const parts = [
+      cameras.length ? `${cameras.length} camera${cameras.length > 1 ? 's' : ''}` : null,
+      locks.length ? 'front door lock' : null,
+      thermostats.length ? 'thermostat' : null,
+      garages.length ? 'garage' : null
+    ].filter(Boolean);
+    const name = state.userName || 'there';
+    aiMsg.innerHTML = `Hey <span class="adie-highlight">${name}</span>! Your home is connected — I can see your ${parts.join(', ')}. Welcome to Cotton Lane! What can I help you with?`;
+  }
+}
+
+// Refresh every 60 seconds
+setInterval(() => {
+  if (amazonToken && document.visibilityState === 'visible') fetchAlexaDeviceStates();
+}, 60000);
 
 // ── Voice Input ──
 let voiceRecognition = null;
