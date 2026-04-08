@@ -3403,11 +3403,156 @@ async function fetchAlexaDeviceStates() {
 }
 
 function updateLuckyWithRealDevices(endpoints) {
-  // Build a device list string for Lucky's system prompt
   const deviceNames = endpoints.map(e => e.friendlyName).join(', ');
   window._alexaDevices = endpoints;
   window._alexaDeviceList = deviceNames;
   console.log('Lucky now knows about:', deviceNames);
+  // Map devices to the right UI sections
+  mapAlexaDevicesToUI(endpoints);
+}
+
+// ── Dynamic Alexa Device Mapping ──
+function mapAlexaDevicesToUI(endpoints) {
+  if (!endpoints || !endpoints.length) return;
+
+  // Categorize all devices
+  const speakers = [];
+  const cameras = [];
+  const locks = [];
+  const thermostats = [];
+  const securityPanels = [];
+  const garages = [];
+
+  endpoints.forEach(device => {
+    const cats = device.displayCategories || [];
+    const name = device.friendlyName || 'Unknown';
+    const id = device.endpointId;
+    const caps = (device.capabilities || []).map(c => c.interface);
+
+    if (cats.includes('SPEAKER') || cats.includes('STREAMING_DEVICE') || 
+        name.toLowerCase().includes('sonos') || caps.includes('Alexa.PlaybackController')) {
+      speakers.push({ id, name });
+    } else if (cats.includes('CAMERA') || cats.includes('DOORBELL') || 
+               name.toLowerCase().includes('ring') || name.toLowerCase().includes('camera') ||
+               name.toLowerCase().includes('doorbell') || name.toLowerCase().includes('blink')) {
+      cameras.push({ id, name });
+    } else if (cats.includes('SMARTLOCK') || caps.includes('Alexa.LockController')) {
+      locks.push({ id, name });
+    } else if (cats.includes('THERMOSTAT') || caps.includes('Alexa.ThermostatController')) {
+      thermostats.push({ id, name });
+    } else if (cats.includes('SECURITY_PANEL') || name.toLowerCase().includes('adt') || 
+               name.toLowerCase().includes('alarm')) {
+      securityPanels.push({ id, name });
+    } else if (cats.includes('GARAGE_DOOR') || name.toLowerCase().includes('garage') ||
+               name.toLowerCase().includes('myq') || name.toLowerCase().includes('liftmaster')) {
+      garages.push({ id, name });
+    }
+  });
+
+  console.log('Mapped:', { speakers: speakers.length, cameras: cameras.length, locks: locks.length, thermostats: thermostats.length, security: securityPanels.length, garages: garages.length });
+
+  // ── Update Music Tab ──
+  if (speakers.length > 0) {
+    const roomsList = document.getElementById('sonos-rooms-list');
+    if (roomsList) {
+      // Update BEARSTONE_ROOMS with real speaker names
+      window._realSpeakers = speakers;
+      const icons = ['🛋️', '🍳', '🛍️', '💻', '🌿', '🛒', '🛏️', '🎤'];
+      roomsList.innerHTML = speakers.map((s, i) => `
+        <div id="sonos-room-${s.id}" onclick="sonosSelectRoom('${s.id}')" style="
+          background:var(--card);border:1px solid var(--border);border-radius:14px;
+          padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s">
+          <span style="font-size:22px">${icons[i % icons.length]}</span>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">${s.name}</div>
+            <div style="font-size:11px;color:var(--text3)">Tap to control</div>
+          </div>
+          <div style="font-size:18px;color:var(--text3)">▶</div>
+        </div>
+      `).join('');
+      // Show Sonos controls since we have real speakers
+      const banner = document.getElementById('sonos-connect-banner');
+      const controls = document.getElementById('sonos-controls');
+      if (banner) banner.style.display = 'none';
+      if (controls) controls.style.display = 'block';
+    }
+  }
+
+  // ── Update Security Tab — Cameras ──
+  if (cameras.length > 0) {
+    const camerasList = document.getElementById('cameras-list');
+    if (camerasList) {
+      camerasList.innerHTML = cameras.map(c => `
+        <div style="background:linear-gradient(160deg,#0a0f14,#060b0f);border:1px solid rgba(59,130,246,0.2);border-radius:14px;margin-bottom:8px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(59,130,246,0.1);display:grid;place-items:center;font-size:20px;flex-shrink:0">📷</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">${c.name}</div>
+              <div style="font-size:11px;color:var(--text2)">Alexa connected · tap for live view</div>
+            </div>
+            <span class="pill pill-blue" style="font-size:10px">LIVE</span>
+          </div>
+        </div>
+      `).join('') + `
+        <div onclick="addCamera()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:14px 16px;cursor:pointer;margin-top:4px">
+          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:20px">📷</div>
+          <div><div style="font-size:13px;font-weight:600">+ Add Camera</div></div>
+        </div>`;
+    }
+  }
+
+  // ── Update Security Tab — Locks ──
+  if (locks.length > 0) {
+    locks.forEach(lock => {
+      // Find existing lock cards and update labels
+      const frontCard = document.getElementById('lock-front');
+      if (frontCard) {
+        const label = frontCard.querySelector('.lock-label');
+        if (label) label.textContent = lock.name;
+      }
+    });
+  }
+
+  // ── Update Climate Tab — Thermostat ──
+  if (thermostats.length > 0) {
+    const thermoName = document.getElementById('thermo-device-name');
+    if (thermoName) thermoName.textContent = thermostats[0].name;
+    const thermoSub = document.getElementById('thermo-device-sub');
+    if (thermoSub) thermoSub.textContent = 'Alexa connected · ' + thermostats[0].name;
+  }
+
+  // ── Update Security Tab — ADT/Security Panel ──
+  if (securityPanels.length > 0) {
+    const adtCard = document.querySelector('[onclick="openADT()"]');
+    if (adtCard) {
+      const label = adtCard.querySelector('.sr-label');
+      if (label) label.innerHTML = `<span class="svc-dot connected"></span>${securityPanels[0].name}`;
+      const sub = adtCard.querySelector('.sr-sub');
+      if (sub) sub.textContent = 'Alexa connected · arm/disarm via voice';
+    }
+  }
+
+  // ── Update Garage ──
+  if (garages.length > 0) {
+    const garageLabel = document.querySelector('.lock-label[data-device="garage"]');
+    const garageCard = document.getElementById('lock-garage');
+    if (garageCard) {
+      const label = garageCard.querySelector('.lock-label');
+      if (label) label.textContent = garages[0].name;
+    }
+  }
+
+  // ── Update Lucky's greeting with real devices ──
+  const aiMsg = document.getElementById('aiMsg');
+  if (aiMsg && amazonUser) {
+    const deviceSummary = [
+      cameras.length > 0 ? `${cameras.length} camera${cameras.length > 1 ? 's' : ''}` : null,
+      speakers.length > 0 ? `${speakers.length} speaker${speakers.length > 1 ? 's' : ''}` : null,
+      thermostats.length > 0 ? 'thermostat' : null,
+      garages.length > 0 ? 'garage' : null
+    ].filter(Boolean).join(', ');
+    aiMsg.innerHTML = `Hey <span class="adie-highlight">Donnie</span>! I can see ${endpoints.length} devices in your home — ${deviceSummary}. Everything looks connected. What do you need?`;
+  }
 }
 
 // Refresh device states every 60 seconds when app is open
