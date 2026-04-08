@@ -518,6 +518,27 @@ html, body {
 }
 .ai-send:active { transform: scale(0.92); }
 .ai-send.loading { opacity: 0.5; pointer-events: none; }
+.ai-mic {
+  width: 42px; height: 42px;
+  background: rgba(245,158,11,0.08);
+  border: 1.5px solid rgba(245,158,11,0.25);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  cursor: pointer; color: #f59e0b;
+  font-size: 18px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.ai-mic:active { transform: scale(0.92); }
+.ai-mic.listening {
+  background: rgba(245,158,11,0.15);
+  border-color: #f59e0b;
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(245,158,11,0.15), 0 0 0 8px rgba(245,158,11,0.06); }
+  50% { box-shadow: 0 0 0 6px rgba(245,158,11,0.25), 0 0 0 12px rgba(245,158,11,0.08); }
+}
 .quick-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .chip {
   background: rgba(245,158,11,0.05);
@@ -1274,10 +1295,13 @@ html, body {
         </div>
         <div class="ai-msg" id="aiMsg">Hey <span id="aiName" class="adie-highlight">there</span>! Everything looks great — doors locked, garage closed. Your Sonos is playing in the living room. Want me to extend it to the bedroom?</div>
         <div class="ai-input-row">
+          <button class="ai-mic" id="aiMic" onclick="toggleVoice()">🎤</button>
           <input class="ai-input" id="aiInput" placeholder="Ask Adie anything…" type="text" />
           <button class="ai-send" id="aiSend" onclick="askAI()">→</button>
         </div>
+        <div id="voice-status" style="display:none;font-size:11px;color:rgba(245,158,11,0.7);text-align:center;margin-top:6px;letter-spacing:0.5px">🎤 Listening… speak now</div>
         <div class="quick-chips">
+          <div class="chip" onclick="toggleVoice()">🎤 Speak</div>
           <div class="chip" onclick="quickAsk('Good night mode — lock everything')">🌙 Night mode</div>
           <div class="chip" onclick="quickAsk('Play something relaxing in the living room')">🎵 Relax</div>
           <div class="chip" onclick="quickAsk('What is my energy usage today?')">⚡ Energy</div>
@@ -3011,7 +3035,7 @@ async function askAI(customMsg) {
 
 Home status: Devices are in setup mode — the homeowner has recently moved in and is still connecting their smart home devices through Alexa. Thermostat set to 72°F. Sonos speakers ready but not yet playing. Cameras and locks pending connection. Echo Dot in kitchen ready for Alexa commands. Samsung TVs connected. The home is part of The Courtyards at Cotton Lane on Kierland Place in Elk Grove, CA 95758 — a Next Generation Capital community.
 
-Your name is Adie. Respond in 1-2 warm, natural sentences. Be helpful and a little personable — like a trusted friend who happens to know everything about their home. Reference specific devices by name when relevant. Occasionally (not always) mention how their NGC smart home makes life easier. Never be robotic or formal. You may use the homeowner's name occasionally to feel personal.`;
+Your name is Adie. You also accept voice commands — the homeowner may speak naturally like "lock the front door" or "set the thermostat to 70" or "play music in the living room." When you receive a voice-style command, acknowledge it warmly and confirm what you're doing. For music, give the Alexa voice command to use with their Echo Dot. Respond in 1-2 warm natural sentences. Be helpful, warm, and a little charming. Never robotic. Use the homeowner's name occasionally.`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3110,6 +3134,60 @@ function startApp() {
   } else {
     initSpotify();
   }
+}
+
+// ── Voice Input ──
+let voiceRecognition = null;
+let voiceActive = false;
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return null;
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  recognition.maxAlternatives = 1;
+  recognition.onstart = () => {
+    voiceActive = true;
+    const mic = document.getElementById('aiMic');
+    const status = document.getElementById('voice-status');
+    const input = document.getElementById('aiInput');
+    if (mic) mic.classList.add('listening');
+    if (status) status.style.display = 'block';
+    if (input) input.placeholder = 'Listening…';
+  };
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    const input = document.getElementById('aiInput');
+    if (input) input.value = transcript;
+    if (e.results[e.results.length - 1].isFinal) {
+      stopVoice();
+      setTimeout(() => askAI(), 300);
+    }
+  };
+  recognition.onerror = (e) => {
+    stopVoice();
+    if (e.error === 'not-allowed') alert('Microphone access denied. Please allow microphone access in your browser settings.');
+  };
+  recognition.onend = () => stopVoice();
+  return recognition;
+}
+function toggleVoice() {
+  if (voiceActive) { stopVoice(); return; }
+  if (!voiceRecognition) voiceRecognition = initVoice();
+  if (!voiceRecognition) { alert('Voice input is not supported on this browser. Try Chrome or Safari.'); return; }
+  try { voiceRecognition.start(); } catch(e) {}
+}
+function stopVoice() {
+  voiceActive = false;
+  const mic = document.getElementById('aiMic');
+  const status = document.getElementById('voice-status');
+  const input = document.getElementById('aiInput');
+  if (mic) mic.classList.remove('listening');
+  if (status) status.style.display = 'none';
+  if (input && input.placeholder === 'Listening…') input.placeholder = 'Ask Adie anything…';
+  try { if (voiceRecognition) voiceRecognition.stop(); } catch(e) {}
 }
 
 // ── Init ──
