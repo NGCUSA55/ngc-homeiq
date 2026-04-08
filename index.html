@@ -1549,19 +1549,32 @@ html, body {
       </div>
       <div id="cameras-list">
         <!-- Doorbell camera connect state -->
-        <div class="connect-card" onclick="alert('Connect your doorbell camera through your Alexa account. Works with Ring, Arlo, Blink, Eufy, Wyze and most major brands.')">
+        <div class="connect-card" onclick="alert('Open the Blink app, sign in with your Amazon account, and add your Blink Video Doorbell. Once connected it will appear here for live view and motion alerts.')">
           <div class="connect-card-icon">📷</div>
           <div class="connect-card-text">
-            <div class="connect-card-title">Connect Doorbell Camera</div>
-            <div class="connect-card-sub">Works with Ring, Arlo, Blink, Eufy, Wyze & more — connect via Alexa</div>
+            <div class="connect-card-title">Blink Video Doorbell</div>
+            <div class="connect-card-sub">Connect via your Amazon account · live view · motion alerts · 2-way audio · no subscription needed</div>
           </div>
           <div class="connect-card-cta">Connect</div>
         </div>
-        <div onclick="addCamera()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:16px;cursor:pointer;margin-top:8px">
-          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:22px;flex-shrink:0">📷</div>
+
+        <!-- LiftMaster Garage Camera -->
+        <div onclick="openMyQCamera()" style="background:linear-gradient(135deg,#0d1218,#0a0e14);border:1px solid rgba(245,158,11,0.15);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;margin-top:8px">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);display:grid;place-items:center;font-size:22px;flex-shrink:0">🏠</div>
+          <div style="flex:1">
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:3px">Garage Camera</div>
+            <div style="font-size:11px;color:var(--text2)">LiftMaster 6580L · 360° built-in camera</div>
+            <div style="font-size:10px;color:rgba(245,158,11,0.6);margin-top:2px">Opens myQ app for live view</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#b45309,#f59e0b);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:#000">View ▶</div>
+        </div>
+
+        <!-- Add more cameras -->
+        <div onclick="addCamera()" style="display:flex;align-items:center;gap:14px;background:var(--card);border:1px dashed var(--border2);border-radius:14px;padding:14px 16px;cursor:pointer;margin-top:8px">
+          <div style="width:42px;height:42px;border-radius:10px;background:var(--border2);display:grid;place-items:center;font-size:20px;flex-shrink:0">📷</div>
           <div>
-            <div style="font-size:14px;font-weight:600;margin-bottom:2px">Add a Camera</div>
-            <div style="font-size:12px;color:var(--text2)">Compatible with all major camera brands</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:2px">+ Add a Camera</div>
+            <div style="font-size:11px;color:var(--text2)">Ring, Arlo, Blink, Eufy, Wyze & more</div>
           </div>
         </div>
       </div>
@@ -2792,6 +2805,18 @@ function toggleLock(id) {
   }
 }
 
+function openMyQCamera() {
+  // Deep link to myQ camera view
+  window.location.href = 'myq://';
+  setTimeout(() => {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    if (isIOS) window.open('https://apps.apple.com/us/app/myq/id1158014544', '_blank');
+    else if (isAndroid) window.open('https://play.google.com/store/apps/details?id=com.chamberlain.android.liftmaster.myq', '_blank');
+    else window.open('https://www.myq.com/app', '_blank');
+  }, 1000);
+}
+
 function openMyQ() {
   // Try to open myQ app via deep link, fall back to web
   window.location.href = 'myq://';
@@ -3034,7 +3059,7 @@ async function askAI(customMsg) {
 
   const system = `You are Adie, the warm and intelligent AI home assistant built into the NGC HomeIQ app by Next Generation Capital. You are the face of the homeowner's smart home — knowledgeable, caring, and a little bit charming. The homeowner's name is ${state.userName || 'the homeowner'}. Their address is ${state.address || 'a home at The Courtyards at Cotton Lane on Kierland Pl, Elk Grove CA 95758'}.
 
-Home status: Devices are in setup mode — the homeowner has recently moved in and is still connecting their smart home devices through Alexa. Thermostat set to 72°F. Sonos speakers ready but not yet playing. Cameras and locks pending connection. Echo Dot in kitchen ready for Alexa commands. Samsung TVs connected. The home is part of The Courtyards at Cotton Lane on Kierland Place in Elk Grove, CA 95758 — a Next Generation Capital community.
+Home hardware: Kwikset Halo WiFi smart lock (front door), Blink Video Doorbell wired (front door camera, Amazon-owned, Alexa-native), Ecobee3 Lite thermostat (WiFi, Alexa-compatible), LiftMaster 6580L garage opener with built-in 360° myQ camera and battery backup, Echo Dot 5th gen (Alexa voice hub). All devices connect via WiFi through Alexa. No monthly fees required — all core features are free. Garage camera viewable via myQ app. Blink doorbell live view accessible via Alexa. Home status: devices are in setup mode — buyer is connecting devices through their Amazon account. The home is part of The Courtyards at Cotton Lane on Kierland Place in Elk Grove, CA 95758 — a Next Generation Capital community.
 
 Your name is Adie. You also accept voice commands — the homeowner may speak naturally like "lock the front door" or "set the thermostat to 70" or "play music in the living room." When you receive a voice-style command, acknowledge it warmly and confirm what you're doing. For music, give the Alexa voice command to use with their Echo Dot. Respond in 1-2 warm natural sentences. Be helpful, warm, and a little charming. Never robotic. Use the homeowner's name occasionally.`;
 
