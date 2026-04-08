@@ -3542,16 +3542,54 @@ function mapAlexaDevicesToUI(endpoints) {
     }
   }
 
+  // ── Update Home Tab Quick Tiles ──
+
+  // Garage tile
+  if (garages.length > 0) {
+    const garageTile = document.getElementById('tile-garage');
+    if (garageTile) {
+      const label = garageTile.querySelector('.tile-label');
+      if (label) label.textContent = garages[0].name.replace(/garage/i, '').trim() || 'Garage';
+    }
+    const garageVal = document.getElementById('quick-garage-val');
+    if (garageVal) { garageVal.textContent = 'Connected'; garageVal.className = 'tile-val green'; }
+  }
+
+  // Climate tile
+  if (thermostats.length > 0) {
+    const tempVal = document.getElementById('quick-temp');
+    if (tempVal) { tempVal.textContent = '72°'; tempVal.className = 'tile-val green'; }
+  }
+
+  // Music tile
+  if (speakers.length > 0) {
+    const musicVal = document.getElementById('quick-music');
+    if (musicVal) { 
+      musicVal.textContent = `${speakers.length} speaker${speakers.length > 1 ? 's' : ''}`; 
+      musicVal.className = 'tile-val blue'; 
+    }
+  }
+
+  // Security status in header if cameras found
+  if (cameras.length > 0) {
+    const secStatus = document.getElementById('sec-status');
+    if (secStatus) secStatus.textContent = `${cameras.length} camera${cameras.length > 1 ? 's' : ''} connected`;
+  }
+
+  // ── Update Home Tab weather/status row with device count ──
+  const deviceCountEl = document.getElementById('device-count');
+  if (deviceCountEl) deviceCountEl.textContent = `${endpoints.length} devices`;
+
   // ── Update Lucky's greeting with real devices ──
   const aiMsg = document.getElementById('aiMsg');
-  if (aiMsg && amazonUser) {
+  if (aiMsg) {
     const deviceSummary = [
       cameras.length > 0 ? `${cameras.length} camera${cameras.length > 1 ? 's' : ''}` : null,
       speakers.length > 0 ? `${speakers.length} speaker${speakers.length > 1 ? 's' : ''}` : null,
       thermostats.length > 0 ? 'thermostat' : null,
       garages.length > 0 ? 'garage' : null
     ].filter(Boolean).join(', ');
-    aiMsg.innerHTML = `Hey <span class="adie-highlight">Donnie</span>! I can see ${endpoints.length} devices in your home — ${deviceSummary}. Everything looks connected. What do you need?`;
+    aiMsg.innerHTML = `Hey <span class="adie-highlight">Donnie</span>! I can see ${endpoints.length} devices — ${deviceSummary}. Everything looks connected. What do you need?`;
   }
 }
 
