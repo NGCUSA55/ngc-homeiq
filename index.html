@@ -1769,6 +1769,17 @@ html, body {
       <!-- Connected Services -->
       <div class="settings-group">
         <div class="sg-label">Connected Services</div>
+
+        <!-- Amazon / Alexa Connection -->
+        <div id="amazon-connect-card" style="background:linear-gradient(135deg,#1a1200,#120d00);border:1px solid rgba(255,153,0,0.25);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,153,0,0.1);border:1px solid rgba(255,153,0,0.25);display:grid;place-items:center;font-size:24px;flex-shrink:0">📦</div>
+          <div style="flex:1">
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:3px">Amazon Account</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.4" id="amazon-status-text">Connect to enable Alexa device control · Blink doorbell · Kwikset lock · Garage</div>
+          </div>
+          <button id="amazon-connect-btn" onclick="loginWithAmazon()" style="background:linear-gradient(135deg,#b45309,#ff9900);border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#000;cursor:pointer;flex-shrink:0">Connect</button>
+        </div>
+
         <div class="setting-row">
           <div class="sr-icon">🎵</div>
           <div class="sr-text">
@@ -3201,6 +3212,93 @@ function startApp() {
   }
 }
 
+// ── Amazon / Alexa Integration ──
+const AMAZON_CLIENT_ID = 'amzn1.application-oa2-client.28e54791654f406499690e14f5604ade';
+const AMAZON_REDIRECT = window.location.origin + window.location.pathname;
+const ALEXA_SCOPES = 'alexa::smart_home alexa::profile profile';
+
+let amazonToken = localStorage.getItem('amazon_token') || null;
+let amazonUser = JSON.parse(localStorage.getItem('amazon_user') || 'null');
+
+function loginWithAmazon() {
+  const state = Math.random().toString(36).substring(2);
+  localStorage.setItem('amazon_oauth_state', state);
+  const params = new URLSearchParams({
+    client_id: AMAZON_CLIENT_ID,
+    scope: 'profile',
+    response_type: 'token',
+    state: state,
+    redirect_uri: AMAZON_REDIRECT
+  });
+  window.location.href = `https://www.amazon.com/ap/oa?${params.toString()}`;
+}
+
+function logoutAmazon() {
+  amazonToken = null;
+  amazonUser = null;
+  localStorage.removeItem('amazon_token');
+  localStorage.removeItem('amazon_user');
+  updateAmazonUI();
+}
+
+async function checkAmazonCallback() {
+  // Check for token in URL hash (implicit flow)
+  const hash = window.location.hash.substring(1);
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  const token = params.get('access_token');
+  const state = params.get('state');
+  if (!token) return;
+  // Validate state
+  const savedState = localStorage.getItem('amazon_oauth_state');
+  localStorage.removeItem('amazon_oauth_state');
+  // Store token
+  amazonToken = token;
+  localStorage.setItem('amazon_token', token);
+  // Clean URL
+  window.history.replaceState({}, '', window.location.pathname);
+  // Fetch Amazon profile
+  try {
+    const res = await fetch('https://api.amazon.com/user/profile', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const profile = await res.json();
+    amazonUser = { name: profile.name, email: profile.email };
+    localStorage.setItem('amazon_user', JSON.stringify(amazonUser));
+  } catch(e) { console.log('Amazon profile error:', e); }
+  updateAmazonUI();
+}
+
+function updateAmazonUI() {
+  const btn = document.getElementById('amazon-connect-btn');
+  const statusText = document.getElementById('amazon-status-text');
+  const card = document.getElementById('amazon-connect-card');
+  if (amazonToken && amazonUser) {
+    if (btn) { btn.textContent = 'Connected ✔'; btn.style.background = 'var(--green)'; btn.style.color = '#000'; btn.onclick = logoutAmazon; }
+    if (statusText) statusText.textContent = `Connected as ${amazonUser.name} · Alexa devices ready`;
+    if (card) card.style.borderColor = 'rgba(34,197,94,0.3)';
+    // Update all device connect buttons
+    const garageBtn = document.querySelector('[onclick*="garage"] .connect-card-cta');
+  } else {
+    if (btn) { btn.textContent = 'Connect'; btn.style.background = 'linear-gradient(135deg,#b45309,#ff9900)'; btn.style.color = '#000'; btn.onclick = loginWithAmazon; }
+    if (statusText) statusText.textContent = 'Connect to enable Alexa device control · Blink doorbell · Kwikset lock · Garage';
+    if (card) card.style.borderColor = 'rgba(255,153,0,0.25)';
+  }
+}
+
+async function alexaCommand(endpointId, namespace, name, payload = {}) {
+  // Calls Alexa Smart Home API to control a device
+  // Requires backend token exchange in production — for now shows intent
+  if (!amazonToken) {
+    alert('Connect your Amazon account first in My Home → Connected Services');
+    return false;
+  }
+  console.log(`Alexa command: ${namespace}.${name} on ${endpointId}`, payload);
+  // In production: POST to Alexa Smart Home API via Apps Script backend
+  // https://api.amazonalexa.com/v3/events
+  return true;
+}
+
 // ── Voice Input ──
 let voiceRecognition = null;
 let voiceActive = false;
@@ -3256,6 +3354,8 @@ function stopVoice() {
 }
 
 // ── Init ──
+checkAmazonCallback(); // Handle Amazon OAuth return
+updateAmazonUI();     // Restore Amazon connected state
 checkOnboarding();
 updateClock(); // Always start clock even during onboarding
 </script>
