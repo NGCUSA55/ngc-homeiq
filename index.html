@@ -3162,7 +3162,8 @@ async function askAI(customMsg) {
 
   const system = `You are Lucky, the AI home assistant for Donnie's personal HomeIQ app. You are modeled after Donnie's beloved light golden retriever, Lucky, who was a good boy in every sense of the word. You are loyal, warm, enthusiastic, and always happy to help — with the energy of a golden retriever who just heard the word "walk." You are also genuinely smart and knows everything about the home. The homeowner's name is ${state.userName || 'Donnie'}. Their address is ${state.address || '9715 Greystone Court, Granite Bay CA 95746'}.
 
-Home status: No digital door locks at this home. Garage closed (MyQ connected), Nest thermostat at 72°F in cool mode, Leviton Decora Smart backyard lights (off by default, controllable via app), Sonos playing "Weightless" by Marconi Union via Spotify in the living room at 65%, doorbell camera active and backyard camera all clear, ADT professional monitoring active and armed, air quality AQI 12 (excellent), energy usage 4.2 kWh today which is 18% below average. Echo Dot in kitchen listening for Alexa commands. Samsung 65" QLED TV in the living room connected via SmartThings, currently on Netflix. Samsung 50" Crystal TV in the bedroom. MyQ garage door opener connected and operational.
+Home status: No digital door locks at this home. Garage controlled via MyQ/LiftMaster. Nest thermostat connected. Leviton Decora Smart backyard lights. Sonos speakers. Ring Video Doorbell and Ring cameras. ADT professional monitoring active. Leviton backyard lights. Samsung TVs via SmartThings. MyQ garage door connected. Echo Dot in kitchen.
+${window._alexaDeviceList ? 'Real Alexa devices currently connected: ' + window._alexaDeviceList + '.' : 'Alexa devices loading...'}
 
 Your name is Lucky. You also accept voice commands — the homeowner may speak naturally like "turn on the backyard lights" or "play jazz in the living room" or "close the garage." When you receive a voice-style command, acknowledge it warmly and confirm what you're doing or would do. For music commands, give the exact Alexa voice command they can say to their Echo Dot, e.g. "Just say 'Alexa, play jazz on Living Room Sonos' — I've got the rest of the house covered." Respond in 1-2 warm natural sentences. Be like a loyal golden retriever who is also a genius — enthusiastic, helpful, personal. Never robotic. Use Donnie's name occasionally.`;
 
@@ -3370,12 +3371,51 @@ function updateAmazonUI() {
     if (btn) { btn.textContent = 'Connected ✔'; btn.style.background = 'var(--green)'; btn.style.color = '#000'; btn.disabled = false; btn.onclick = logoutAmazon; }
     if (statusText) statusText.textContent = `Connected as ${amazonUser.name || amazonUser.email} · Alexa ready · Ring · Nest · MyQ`;
     if (card) card.style.borderColor = 'rgba(34,197,94,0.3)';
+    // Fetch real device states now that we have a token
+    fetchAlexaDeviceStates();
   } else {
     if (btn) { btn.textContent = 'Connect'; btn.style.background = 'linear-gradient(135deg,#b45309,#ff9900)'; btn.style.color = '#000'; btn.disabled = false; btn.onclick = loginWithAmazon; }
-    if (statusText) statusText.textContent = 'Connect to enable Alexa device control · Ring · Nest · Garage';
+    if (statusText) statusText.textContent = 'Connect to enable Alexa device control · Ring · Nest · MyQ · Garage';
     if (card) card.style.borderColor = 'rgba(255,153,0,0.25)';
   }
 }
+
+// ── Fetch Real Alexa Device States ──
+async function fetchAlexaDeviceStates() {
+  if (!amazonToken) return;
+  try {
+    // Get all endpoints (devices) from Alexa
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_devices&token=${encodeURIComponent(amazonToken)}`);
+    const data = await res.json();
+    if (data.error || !data.endpoints) {
+      console.log('Alexa devices error:', data.error || 'no endpoints');
+      return;
+    }
+    console.log('Alexa devices found:', data.endpoints.length);
+    // Update Lucky system prompt with real device names
+    updateLuckyWithRealDevices(data.endpoints);
+    // Show device count in status
+    const statusText = document.getElementById('amazon-status-text');
+    if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · ${data.endpoints.length} devices found · Alexa ready`;
+  } catch(e) {
+    console.log('fetchAlexaDeviceStates error:', e);
+  }
+}
+
+function updateLuckyWithRealDevices(endpoints) {
+  // Build a device list string for Lucky's system prompt
+  const deviceNames = endpoints.map(e => e.friendlyName).join(', ');
+  window._alexaDevices = endpoints;
+  window._alexaDeviceList = deviceNames;
+  console.log('Lucky now knows about:', deviceNames);
+}
+
+// Refresh device states every 60 seconds when app is open
+setInterval(() => {
+  if (amazonToken && document.visibilityState === 'visible') {
+    fetchAlexaDeviceStates();
+  }
+}, 60000);
 
 // ── Voice Input ──
 let voiceRecognition = null;
