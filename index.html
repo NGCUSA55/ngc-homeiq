@@ -3470,28 +3470,28 @@ const ALEXA_API_URL = 'https://rodmc8n202.execute-api.us-east-1.amazonaws.com';
 
 async function fetchAlexaDeviceStates() {
   if (!amazonToken) return;
+  const statusText = document.getElementById('amazon-status-text');
   try {
-    // Get all endpoints (devices) from Alexa via API Gateway → Lambda
+    if (statusText) statusText.textContent = 'Fetching devices...';
     const res = await fetch(`${ALEXA_API_URL}/devices?token=${encodeURIComponent(amazonToken)}`);
-    const data = await res.json();
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch(e) {
+      if (statusText) statusText.textContent = `API parse error: ${raw.substring(0, 100)}`;
+      return;
+    }
     if (data.error) {
-      console.log('Alexa devices error:', data.error);
-      const statusText = document.getElementById('amazon-status-text');
-      if (statusText && data.error.includes('Token lacks')) {
-        statusText.textContent = `${amazonUser?.name || 'Connected'} · Skill linking needed for device access`;
-      }
+      if (statusText) statusText.textContent = `Device error: ${typeof data.error === 'string' ? data.error.substring(0, 80) : JSON.stringify(data.error).substring(0, 80)}`;
       return;
     }
     if (!data.endpoints || !data.endpoints.length) {
-      console.log('No devices found');
+      if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · 0 devices · Response: ${JSON.stringify(data).substring(0, 60)}`;
       return;
     }
-    console.log('Alexa devices found:', data.count || data.endpoints.length);
     updateLuckyWithRealDevices(data.endpoints);
-    const statusText = document.getElementById('amazon-status-text');
     if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · ${data.endpoints.length} devices found · Alexa ready`;
   } catch(e) {
-    console.log('fetchAlexaDeviceStates error:', e);
+    if (statusText) statusText.textContent = `Fetch error: ${e.message}`;
   }
 }
 
