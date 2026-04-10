@@ -3467,13 +3467,26 @@ function updateAmazonUI() {
 
 // ── Fetch Real Alexa Device States ──
 const ALEXA_API_URL = 'https://rodmc8n202.execute-api.us-east-1.amazonaws.com';
+let alexaSkillToken = null;
 
 async function fetchAlexaDeviceStates() {
-  if (!amazonToken) return;
+  if (!amazonUser?.email) return;
   const statusText = document.getElementById('amazon-status-text');
   try {
+    // Step 1: Get the skill session token cached by email
+    if (!alexaSkillToken) {
+      if (statusText) statusText.textContent = 'Checking for Alexa skill token...';
+      const tokenRes = await fetch(`${ALEXA_API_URL}/token?email=${encodeURIComponent(amazonUser.email.toLowerCase())}`);
+      const tokenData = await tokenRes.json();
+      if (tokenData.error || !tokenData.token) {
+        if (statusText) statusText.textContent = `${amazonUser.name || 'Connected'} · Say "Alexa, open My Adie" once to sync devices`;
+        return;
+      }
+      alexaSkillToken = tokenData.token;
+    }
+    // Step 2: Use the skill token to fetch devices
     if (statusText) statusText.textContent = 'Fetching devices...';
-    const res = await fetch(`${ALEXA_API_URL}/devices?token=${encodeURIComponent(amazonToken)}`);
+    const res = await fetch(`${ALEXA_API_URL}/devices?token=${encodeURIComponent(alexaSkillToken)}`);
     const raw = await res.text();
     let data;
     try { data = JSON.parse(raw); } catch(e) {
@@ -3481,15 +3494,17 @@ async function fetchAlexaDeviceStates() {
       return;
     }
     if (data.error) {
-      if (statusText) statusText.textContent = `Device error: ${typeof data.error === 'string' ? data.error.substring(0, 80) : JSON.stringify(data.error).substring(0, 80)}`;
+      // Token might be expired — clear cache and ask user to reopen Adie
+      alexaSkillToken = null;
+      if (statusText) statusText.textContent = `${amazonUser.name || 'Connected'} · Say "Alexa, open My Adie" to refresh device access`;
       return;
     }
     if (!data.endpoints || !data.endpoints.length) {
-      if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · 0 devices · Response: ${JSON.stringify(data).substring(0, 60)}`;
+      if (statusText) statusText.textContent = `${amazonUser.name || 'Connected'} · 0 devices found`;
       return;
     }
     updateLuckyWithRealDevices(data.endpoints);
-    if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · ${data.endpoints.length} devices found · Alexa ready`;
+    if (statusText) statusText.textContent = `${amazonUser.name || 'Connected'} · ${data.endpoints.length} devices found · Alexa ready`;
   } catch(e) {
     if (statusText) statusText.textContent = `Fetch error: ${e.message}`;
   }
