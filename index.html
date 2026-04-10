@@ -2578,7 +2578,11 @@ async function setArmMode(mode) {
   // Send to Alexa if connected
   if (amazonToken && window._adtEndpointId) {
     try {
-      const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_command&token=${encodeURIComponent(amazonToken)}&endpoint_id=${encodeURIComponent(window._adtEndpointId)}&namespace=Alexa.SecurityPanelController&name=Arm&payload=${encodeURIComponent(JSON.stringify({ armState: c.alexa }))}`);
+      const res = await fetch(`${ALEXA_API_URL}/command`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: amazonToken, endpoint_id: window._adtEndpointId, namespace: 'Alexa.SecurityPanelController', name: 'Arm', payload: { armState: c.alexa } })
+      });
       const data = await res.json();
       console.log('ADT arm response:', data);
       if (!data.error) {
@@ -2632,7 +2636,11 @@ function updateSecurityBadge(mode, c) {
 async function queryADTState() {
   if (!amazonToken || !window._adtEndpointId) return;
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_command&token=${encodeURIComponent(amazonToken)}&endpoint_id=${encodeURIComponent(window._adtEndpointId)}&namespace=Alexa&name=ReportState&payload={}`);
+    const res = await fetch(`${ALEXA_API_URL}/command`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: amazonToken, endpoint_id: window._adtEndpointId, namespace: 'Alexa', name: 'ReportState', payload: {} })
+    });
     const data = await res.json();
     if (data.context && data.context.properties) {
       const armProp = data.context.properties.find(p => p.name === 'armState');
@@ -3458,20 +3466,28 @@ function updateAmazonUI() {
 }
 
 // ── Fetch Real Alexa Device States ──
+const ALEXA_API_URL = 'https://rodmc8n202.execute-api.us-east-1.amazonaws.com';
+
 async function fetchAlexaDeviceStates() {
   if (!amazonToken) return;
   try {
-    // Get all endpoints (devices) from Alexa
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_devices&token=${encodeURIComponent(amazonToken)}`);
+    // Get all endpoints (devices) from Alexa via API Gateway → Lambda
+    const res = await fetch(`${ALEXA_API_URL}/devices?token=${encodeURIComponent(amazonToken)}`);
     const data = await res.json();
-    if (data.error || !data.endpoints) {
-      console.log('Alexa devices error:', data.error || 'no endpoints');
+    if (data.error) {
+      console.log('Alexa devices error:', data.error);
+      const statusText = document.getElementById('amazon-status-text');
+      if (statusText && data.error.includes('Token lacks')) {
+        statusText.textContent = `${amazonUser?.name || 'Connected'} · Skill linking needed for device access`;
+      }
       return;
     }
-    console.log('Alexa devices found:', data.endpoints.length);
-    // Update Lucky system prompt with real device names
+    if (!data.endpoints || !data.endpoints.length) {
+      console.log('No devices found');
+      return;
+    }
+    console.log('Alexa devices found:', data.count || data.endpoints.length);
     updateLuckyWithRealDevices(data.endpoints);
-    // Show device count in status
     const statusText = document.getElementById('amazon-status-text');
     if (statusText) statusText.textContent = `${amazonUser?.name || 'Connected'} · ${data.endpoints.length} devices found · Alexa ready`;
   } catch(e) {
