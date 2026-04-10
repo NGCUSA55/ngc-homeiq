@@ -3306,10 +3306,12 @@ async function alexaCommand(endpointId, namespace, name, payload = {}) {
 }
 
 // ── Fetch Real Alexa Device States ──
+const ALEXA_API_URL = 'https://rodmc8n202.execute-api.us-east-1.amazonaws.com';
+
 async function fetchAlexaDeviceStates() {
   if (!amazonToken) return;
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=alexa_devices&token=${encodeURIComponent(amazonToken)}`);
+    const res = await fetch(`${ALEXA_API_URL}/devices?token=${encodeURIComponent(amazonToken)}`);
     const data = await res.json();
     if (data.error || !data.endpoints) return;
     console.log('Alexa devices found:', data.endpoints.length);
