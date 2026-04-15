@@ -2674,95 +2674,196 @@ async function queryADTState() {
 function addCamera() {
   alert('Camera setup: When Ring API access is approved, this will walk you through connecting your Ring cameras. For now the demo shows what the live view will look like.');
 }
-// ── Sonos Integration ──
+// ── Sonos Integration (Real API) ──
 const SONOS_CLIENT_ID = 'c8921eac-9ba3-4600-9f20-7e89385a2158';
-const SONOS_REDIRECT = 'https://homeiq-donnie.vercel.app/';
-const SONOS_SCOPES = 'playback-control-all';
+const SONOS_REDIRECT = window.location.origin + '/';
 
 let sonosToken = localStorage.getItem('sonos_token') || null;
+let sonosRefreshToken = localStorage.getItem('sonos_refresh') || null;
 let sonosHouseholdId = localStorage.getItem('sonos_household') || null;
-let sonosGroups = []; // current groups from API
+let sonosGroups = [];
+let sonosPlayers = [];
+let sonosActiveGroupId = null;
+let sonosPlaying = false;
 let sonosGroupMode = false;
 let sonosSelectedRooms = new Set();
-let sonosPlaying = false;
-
-// Rooms for Bearstone (populated from Sonos API or defaults)
-const BEARSTONE_ROOMS = [
-  { id: 'living', name: 'Living Room', icon: '🛋️' },
-  { id: 'kitchen', name: 'Kitchen', icon: '🍳' },
-  { id: 'master', name: 'Master Bedroom', icon: '🛏️' },
-  { id: 'office', name: 'Office', icon: '💻' },
-  { id: 'outdoor', name: 'Patio', icon: '🌿' },
-];
 
 function sonosLogin() {
-  const authUrl = `https://api.sonos.com/login/v3/oauth?client_id=${SONOS_CLIENT_ID}&response_type=code&state=sonos_auth&scope=${encodeURIComponent(SONOS_SCOPES)}&redirect_uri=${encodeURIComponent(SONOS_REDIRECT)}`;
-  window.location.href = authUrl;
+  const state = Math.random().toString(36).substring(2);
+  localStorage.setItem('sonos_oauth_state', state);
+  const params = new URLSearchParams({
+    client_id: SONOS_CLIENT_ID,
+    response_type: 'code',
+    state: 'sonos_' + state,
+    scope: 'playback-control-all',
+    redirect_uri: SONOS_REDIRECT
+  });
+  window.location.href = `https://api.sonos.com/login/v3/oauth?${params.toString()}`;
 }
 
-function sonosCheckToken() {
-  // Check URL for Sonos OAuth callback
+function sonosLogout() {
+  sonosToken = null; sonosRefreshToken = null; sonosHouseholdId = null;
+  sonosGroups = []; sonosPlayers = [];
+  localStorage.removeItem('sonos_token');
+  localStorage.removeItem('sonos_refresh');
+  localStorage.removeItem('sonos_household');
+  const banner = document.getElementById('sonos-connect-banner');
+  const controls = document.getElementById('sonos-controls');
+  if (banner) banner.style.display = 'block';
+  if (controls) controls.style.display = 'none';
+}
+
+async function sonosCheckToken() {
+  // Check for Sonos OAuth callback
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
   const state = params.get('state');
-  if (code && state === 'sonos_auth') {
-    // Exchange code for token — requires backend in production
-    // For now store a demo mode flag
-    localStorage.setItem('sonos_connected', 'demo');
+  if (code && state && state.startsWith('sonos_')) {
     window.history.replaceState({}, '', window.location.pathname);
+    try {
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=sonos_token&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(SONOS_REDIRECT)}`);
+      const data = await res.json();
+      if (data.error) { console.log('Sonos token error:', data); return; }
+      sonosToken = data.access_token;
+      sonosRefreshToken = data.refresh_token;
+      localStorage.setItem('sonos_token', sonosToken);
+      if (sonosRefreshToken) localStorage.setItem('sonos_refresh', sonosRefreshToken);
+    } catch(e) { console.log('Sonos auth error:', e); return; }
   }
-  const connected = localStorage.getItem('sonos_connected');
-  if (connected) initSonosUI();
+  if (sonosToken) await initSonosUI();
 }
 
-function initSonosUI() {
+async function sonosApi(method, path, body) {
+  if (!sonosToken) return null;
+  try {
+    const params = new URLSearchParams({
+      action: 'sonos_api',
+      token: sonosToken,
+      method: method,
+      path: path
+    });
+    if (body) params.set('body', typeof body === 'string' ? body : JSON.stringify(body));
+    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+    // Handle token expiry
+    if (result.status === 401 && sonosRefreshToken) {
+      const refreshRes = await fetch(`${APPS_SCRIPT_URL}?action=sonos_refresh&refresh_token=${encodeURIComponent(sonosRefreshToken)}`);
+      const refreshData = await refreshRes.json();
+      if (refreshData.access_token) {
+        sonosToken = refreshData.access_token;
+        localStorage.setItem('sonos_token', sonosToken);
+        if (refreshData.refresh_token) { sonosRefreshToken = refreshData.refresh_token; localStorage.setItem('sonos_refresh', sonosRefreshToken); }
+        // Retry
+        params.set('token', sonosToken);
+        const retry = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        return (await retry.json()).data;
+      }
+    }
+    return result.data;
+  } catch(e) { console.log('Sonos API error:', e); return null; }
+}
+
+async function initSonosUI() {
   const banner = document.getElementById('sonos-connect-banner');
   const controls = document.getElementById('sonos-controls');
   if (banner) banner.style.display = 'none';
   if (controls) controls.style.display = 'block';
+  // Get households
+  const households = await sonosApi('GET', '/households');
+  if (!households || !households.households || !households.households.length) {
+    console.log('No Sonos households found');
+    return;
+  }
+  sonosHouseholdId = households.households[0].id;
+  localStorage.setItem('sonos_household', sonosHouseholdId);
+  // Get groups (rooms)
+  await refreshSonosGroups();
+}
+
+async function refreshSonosGroups() {
+  if (!sonosHouseholdId) return;
+  const data = await sonosApi('GET', `/households/${sonosHouseholdId}/groups`);
+  if (!data || !data.groups) return;
+  sonosGroups = data.groups;
+  sonosPlayers = data.players || [];
   renderSonosRooms();
+  // Get playback state of first group
+  if (sonosGroups.length > 0) {
+    sonosActiveGroupId = sonosGroups[0].id;
+    await refreshSonosPlayback();
+  }
+}
+
+async function refreshSonosPlayback() {
+  if (!sonosActiveGroupId) return;
+  const pb = await sonosApi('GET', `/groups/${sonosActiveGroupId}/playback`);
+  if (pb) {
+    sonosPlaying = pb.playbackState === 'PLAYBACK_STATE_PLAYING';
+    const btn = document.getElementById('sonos-play-btn');
+    if (btn) btn.textContent = sonosPlaying ? '⏸' : '▶';
+  }
+  // Get metadata
+  const meta = await sonosApi('GET', `/groups/${sonosActiveGroupId}/playbackMetadata`);
+  if (meta && meta.currentItem && meta.currentItem.track) {
+    const track = meta.currentItem.track;
+    document.getElementById('sonos-track').textContent = track.name || 'Unknown';
+    document.getElementById('sonos-artist').textContent = track.artist ? track.artist.name : '';
+    const art = document.getElementById('sonos-album-art');
+    if (art && track.imageUrl) art.innerHTML = `<img src="${track.imageUrl}" style="width:100%;height:100%;border-radius:12px;object-fit:cover">`;
+    else if (art) art.textContent = '🎵';
+    const src = document.getElementById('sonos-source-label');
+    if (src && meta.currentItem.track.service) src.textContent = meta.currentItem.track.service.name || 'Sonos';
+  }
+  // Get volume
+  const vol = await sonosApi('GET', `/groups/${sonosActiveGroupId}/groupVolume`);
+  if (vol) {
+    const slider = document.getElementById('sonos-vol-slider');
+    const label = document.getElementById('sonos-vol-label');
+    if (slider) slider.value = vol.volume || 50;
+    if (label) label.textContent = vol.volume || 50;
+  }
 }
 
 function renderSonosRooms() {
   const list = document.getElementById('sonos-rooms-list');
   if (!list) return;
-  list.innerHTML = BEARSTONE_ROOMS.map(room => `
-    <div id="sonos-room-${room.id}" onclick="sonosSelectRoom('${room.id}')" style="
-      background:var(--card);border:1px solid var(--border);border-radius:14px;
-      padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;
-      transition:all 0.2s;
-    ">
-      <span style="font-size:22px">${room.icon}</span>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600">${room.name}</div>
-        <div class="sonos-room-status-${room.id}" style="font-size:11px;color:var(--text3)">Tap to control</div>
-      </div>
-      <div class="sonos-room-check-${room.id}" style="display:none;width:24px;height:24px;border-radius:50%;background:var(--accent);display:none;place-items:center;font-size:12px">✔</div>
-      <div style="font-size:18px;color:var(--text3)">▶</div>
-    </div>
-  `).join('');
+  const icons = ['🛋️', '🍳', '🛏️', '💻', '🌿', '🎤', '🛒', '🛏️'];
+  list.innerHTML = sonosGroups.map((group, i) => {
+    const playerNames = group.playerIds ? group.playerIds.map(pid => {
+      const p = sonosPlayers.find(pl => pl.id === pid);
+      return p ? p.name : '';
+    }).filter(Boolean).join(', ') : '';
+    return `
+      <div id="sonos-room-${group.id}" onclick="sonosSelectRoom('${group.id}')" style="
+        background:var(--card);border:1px solid ${group.id === sonosActiveGroupId ? 'rgba(59,130,246,0.5)' : 'var(--border)'};border-radius:14px;
+        padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s">
+        <span style="font-size:22px">${icons[i % icons.length]}</span>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${group.name || playerNames || 'Group ' + (i+1)}</div>
+          <div style="font-size:11px;color:var(--text3)">${group.playerIds ? group.playerIds.length + ' player' + (group.playerIds.length > 1 ? 's' : '') : ''}</div>
+        </div>
+        <div style="font-size:18px;color:var(--text3)">▶</div>
+      </div>`;
+  }).join('');
 }
 
-function sonosSelectRoom(roomId) {
+async function sonosSelectRoom(groupId) {
   if (sonosGroupMode) {
-    // Toggle room selection for grouping
-    if (sonosSelectedRooms.has(roomId)) {
-      sonosSelectedRooms.delete(roomId);
-    } else {
-      sonosSelectedRooms.add(roomId);
-    }
+    if (sonosSelectedRooms.has(groupId)) sonosSelectedRooms.delete(groupId);
+    else sonosSelectedRooms.add(groupId);
     updateSonosGroupUI();
     return;
   }
-  // Single room control — update now playing header
-  const room = BEARSTONE_ROOMS.find(r => r.id === roomId);
-  if (!room) return;
-  document.getElementById('sonos-source-label').textContent = `${room.name} · Sonos`;
-  // Highlight selected room
-  BEARSTONE_ROOMS.forEach(r => {
-    const el = document.getElementById(`sonos-room-${r.id}`);
-    if (el) el.style.borderColor = r.id === roomId ? 'rgba(59,130,246,0.5)' : 'var(--border)';
+  sonosActiveGroupId = groupId;
+  // Highlight
+  sonosGroups.forEach(g => {
+    const el = document.getElementById(`sonos-room-${g.id}`);
+    if (el) el.style.borderColor = g.id === groupId ? 'rgba(59,130,246,0.5)' : 'var(--border)';
   });
+  const group = sonosGroups.find(g => g.id === groupId);
+  const src = document.getElementById('sonos-source-label');
+  if (src && group) src.textContent = (group.name || 'Group') + ' · Sonos';
+  await refreshSonosPlayback();
 }
 
 function toggleSonosGroupMode() {
@@ -2772,77 +2873,91 @@ function toggleSonosGroupMode() {
   const bar = document.getElementById('sonos-group-bar');
   if (toggle) toggle.textContent = sonosGroupMode ? 'Cancel' : 'Group rooms';
   if (bar) bar.style.display = sonosGroupMode ? 'flex' : 'none';
-  updateSonosGroupUI();
 }
 
 function updateSonosGroupUI() {
   const count = document.getElementById('sonos-group-count');
   if (count) count.textContent = `${sonosSelectedRooms.size} room${sonosSelectedRooms.size !== 1 ? 's' : ''} selected`;
-  BEARSTONE_ROOMS.forEach(r => {
-    const el = document.getElementById(`sonos-room-${r.id}`);
-    if (el) el.style.borderColor = sonosSelectedRooms.has(r.id) ? 'rgba(59,130,246,0.6)' : 'var(--border)';
+  sonosGroups.forEach(g => {
+    const el = document.getElementById(`sonos-room-${g.id}`);
+    if (el) el.style.borderColor = sonosSelectedRooms.has(g.id) ? 'rgba(59,130,246,0.6)' : 'var(--border)';
   });
 }
 
-function sonosGroupSelected() {
+async function sonosGroupSelected() {
   if (sonosSelectedRooms.size < 2) { alert('Select at least 2 rooms to group.'); return; }
-  const names = [...sonosSelectedRooms].map(id => BEARSTONE_ROOMS.find(r => r.id === id)?.name).join(', ');
-  document.getElementById('sonos-source-label').textContent = `Group · ${names}`;
+  // Get player IDs from selected groups
+  const playerIds = [];
+  sonosSelectedRooms.forEach(gid => {
+    const g = sonosGroups.find(gr => gr.id === gid);
+    if (g && g.playerIds) playerIds.push(...g.playerIds);
+  });
+  if (playerIds.length >= 2) {
+    await sonosApi('POST', `/households/${sonosHouseholdId}/groups/createGroup`, { playerIds });
+    await refreshSonosGroups();
+  }
   toggleSonosGroupMode();
-  // In production: POST to Sonos createGroup API
 }
 
-function sonosAction(action) {
+async function sonosAction(action) {
+  if (!sonosActiveGroupId) return;
   const btn = document.getElementById('sonos-play-btn');
   if (action === 'playpause') {
-    sonosPlaying = !sonosPlaying;
-    if (btn) btn.textContent = sonosPlaying ? '⏸' : '▶';
-    document.getElementById('sonos-track').textContent = sonosPlaying ? 'Now Playing' : 'Paused';
-    document.getElementById('sonos-artist').textContent = sonosPlaying ? 'Sonos · Bearstone' : 'Tap play to resume';
+    if (sonosPlaying) {
+      await sonosApi('POST', `/groups/${sonosActiveGroupId}/playback/pause`);
+      sonosPlaying = false;
+      if (btn) btn.textContent = '▶';
+    } else {
+      await sonosApi('POST', `/groups/${sonosActiveGroupId}/playback/play`);
+      sonosPlaying = true;
+      if (btn) btn.textContent = '⏸';
+    }
+  } else if (action === 'next') {
+    await sonosApi('POST', `/groups/${sonosActiveGroupId}/playback/skipToNextTrack`);
+  } else if (action === 'prev') {
+    await sonosApi('POST', `/groups/${sonosActiveGroupId}/playback/skipToPreviousTrack`);
   }
-  // In production: POST to Sonos playback API
+  setTimeout(() => refreshSonosPlayback(), 1000);
 }
 
-function sonosSetVolume(val) {
+async function sonosSetVolume(val) {
   const label = document.getElementById('sonos-vol-label');
   if (label) label.textContent = val;
-  // In production: POST to Sonos groupVolume API
+  if (sonosActiveGroupId) {
+    await sonosApi('POST', `/groups/${sonosActiveGroupId}/groupVolume`, { volume: parseInt(val) });
+  }
 }
 
 function sonosOpenSource(source) {
-  const urls = {
-    spotify: 'https://open.spotify.com',
-    apple: 'https://music.apple.com',
-    amazon: 'https://music.amazon.com',
-    radio: 'https://tunein.com'
-  };
+  const urls = { spotify: 'https://open.spotify.com', apple: 'https://music.apple.com', amazon: 'https://music.amazon.com', radio: 'https://tunein.com' };
   window.open(urls[source] || 'https://www.sonos.com', '_blank');
-  // In production: use Sonos loadAudioClip or audioClip to set source
 }
 
-function sonosScene(scene) {
+async function sonosScene(scene) {
+  if (!sonosActiveGroupId) { alert('Select a room first'); return; }
   const scenes = {
-    morning: { rooms: ['kitchen'], vol: 30, track: 'Morning Vibes', artist: 'Sonos Radio' },
-    evening: { rooms: ['living','kitchen','master'], vol: 45, track: 'Evening Ambient', artist: 'Sonos Radio' },
-    party:   { rooms: ['living','kitchen','outdoor'], vol: 70, track: 'Party Mix', artist: 'Sonos Radio' },
-    off:     { rooms: [], vol: 0, track: 'All paused', artist: 'Tap play to resume' }
+    morning: { vol: 30 },
+    evening: { vol: 45 },
+    party:   { vol: 70 },
+    off:     { vol: 0, pause: true }
   };
   const s = scenes[scene];
   if (!s) return;
-  if (scene === 'off') {
+  if (s.pause) {
+    await sonosApi('POST', `/groups/${sonosActiveGroupId}/playback/pause`);
     sonosPlaying = false;
     document.getElementById('sonos-play-btn').textContent = '▶';
   } else {
-    sonosPlaying = true;
-    document.getElementById('sonos-play-btn').textContent = '⏸';
+    await sonosApi('POST', `/groups/${sonosActiveGroupId}/groupVolume`, { volume: s.vol });
+    if (!sonosPlaying) {
+      await sonosApi('POST', `/groups/${sonosActiveGroupId}/playback/play`);
+      sonosPlaying = true;
+      document.getElementById('sonos-play-btn').textContent = '⏸';
+    }
   }
-  document.getElementById('sonos-track').textContent = s.track;
-  document.getElementById('sonos-artist').textContent = s.artist;
   document.getElementById('sonos-vol-slider').value = s.vol;
   document.getElementById('sonos-vol-label').textContent = s.vol;
-  const rNames = s.rooms.map(id => BEARSTONE_ROOMS.find(r => r.id === id)?.name).filter(Boolean).join(', ');
-  document.getElementById('sonos-source-label').textContent = rNames || 'All rooms';
-  // In production: call Sonos group API + set volume + load content
+  setTimeout(() => refreshSonosPlayback(), 1000);
 }
 
 function addSpeaker() {
