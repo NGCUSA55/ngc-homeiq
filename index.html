@@ -2678,6 +2678,8 @@ function addCamera() {
 const SONOS_CLIENT_ID = 'c8921eac-9ba3-4600-9f20-7e89385a2158';
 const SONOS_REDIRECT = window.location.origin + '/';
 
+// Clean up old demo flag
+localStorage.removeItem('sonos_connected');
 let sonosToken = localStorage.getItem('sonos_token') || null;
 let sonosRefreshToken = localStorage.getItem('sonos_refresh') || null;
 let sonosHouseholdId = localStorage.getItem('sonos_household') || null;
